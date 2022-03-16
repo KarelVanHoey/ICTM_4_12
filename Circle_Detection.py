@@ -8,7 +8,7 @@ skipFrames = 3
 while True:
     # Extract single frame
     ret, frame = cap.read()
-    if fcnt > skipFrames:
+    if fcnt > skipFrames:       #used to skip some frames to minimize computational load
         #Make greyscale
         thresh = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # Use houghcircles to determine centre of circle
