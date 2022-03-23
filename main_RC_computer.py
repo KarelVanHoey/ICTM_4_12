@@ -41,12 +41,17 @@ def server_send(threadName, port):
     while exitFlag == 0:
         if keyboard.is_pressed('z'):
             message = 'forward'
+            print('z')
         elif keyboard.is_pressed('q'):
             message = 'left'
         elif keyboard.is_pressed('d'):
             message = 'right'
         elif keyboard.is_pressed('s'):
             message = 'back'
+        elif keyboard.is_pressed('u'):
+            message = 'up'
+        elif keyboard.is_pressed('j'):
+            message = 'down'
         else:
             message = 'stop'
         message_as_bytes = str.encode(message)
