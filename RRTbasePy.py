@@ -1,4 +1,5 @@
 #from asyncio.unix_events import _UnixDefaultEventLoopPolicy
+from email.errors import NonPrintableDefect
 from pickle import GLOBAL
 import random
 import math
@@ -24,7 +25,7 @@ class RRTMap:
         pygame.display.set_caption(self.MapWindowName)
         self.map=pygame.display.set_mode((self.Mapw, self.Maph))
         self.map.fill((255,255,255))
-        self.nodeRad = 0
+        self.nodeRad = 2
         self.nodeThickness = 0
         self.edgeThickness = 1
 
@@ -107,8 +108,8 @@ class RRTGraph:
         return obs 
 
     def add_node(self,n,x,y):
-        self.x.insert(n,x)
-        self.y.insert(n,y)
+        self.x.append(x)
+        self.y.append(y)
 
     def remove_node(self,n):
         self.x.pop(n)
@@ -130,8 +131,14 @@ class RRTGraph:
         py=(float(y1)-float(y2))**2
         return (px+py)**0.5
 
-    def nearest(self):
-        pass
+    def nearest(self, n):
+        dmin = self.distance(0,n)
+        nnear=0
+        for i in range(0,n):
+            dmin = self.distance(i,n)
+            nnear = i 
+            return nnear
+
 
     def sample_envir(self):
         x=int(random.uniform(0,self.mapw))
@@ -151,7 +158,7 @@ class RRTGraph:
     
     def crossObstacle(self,x1,x2,y1,y2):
         obs=self.obstacles.copy()
-        while len(obs)>0:
+        while (len(obs)>0):
             rectang=obs.pop(0)
             for i in range(0,101):
                 u=i/100
@@ -159,6 +166,8 @@ class RRTGraph:
                 y=y1*u+y2*(1-u)
                 if rectang.collidepoint(x,y):
                     return True
+                
+            
         return False
 
 
@@ -174,8 +183,24 @@ class RRTGraph:
 
 
 
-    def step(self):
-        pass
+    def step(self,nnear,nrand,dmax=35):
+        d=self.distance(nnear,nstep)
+        if d>dmax:
+            u=dmax/d
+            (xnear,ynear) = (self.x[nnear],self.y[nnear])
+            (xrand,yrand) = (self.x[nrand],self.y[nrand])
+            (px,py) = (xrand-xnear,yrand-ynear)
+            theta = math.atan2(py,px)
+            (x,y) = (int(xnear+dmax*math.cos(theta)),int(ynear+dmax*math.sin(theta)))
+            self.remove_node(nrand)
+            if abs(x-self.goal[0])<35 and abs(y-self.goal[1]<35):
+                self.add_node(nrand,self.goal[0],self.goal[1])
+                self.goalstate=nrand
+                self.goalFlag=True
+            else:
+                self.add_node(nrand, x, y)
+
+
 
     def path_to_goal(self):
         pass
@@ -183,35 +208,17 @@ class RRTGraph:
     def getPathCoords(self):
         pass
 
-    def bias(self):
-        pass
+    def bias(self,ngoal):
+        n = self.number_of_nodes()
+        self.add_node(n,ngoal[0],ngoal[1])
+        nnear = self.nearest(n)
+        self.step(nnear,n)
+        self.connect(nnear,n)
+        return self.x,self.y,self.parent
+        
 
     def expand(self):
         pass
 
     def cost(self):
         pass
-
-
-def main():
-    dimensions = (600,1000)
-    start = (50,50)
-    goal = (510, 510)
-    obsdim = 30
-    obsnum = 50
-
-    pygame.init()
-    map = RRTMap(start,goal,dimensions,obsdim,obsnum)
-    graph = RRTGraph(start,goal,dimensions,obsdim,obsnum)
-
-    obstacles=graph.makeobs()
-
-    map.drawMap(obstacles)
-
-    pygame.display.update()
-    pygame.event.clear()
-    pygame.event.wait(0)
-
-
-if __name__ == '__main__':
-    main()
