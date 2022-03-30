@@ -1,10 +1,11 @@
 import cv2
 import time
+from cv2 import imshow
 import numpy as np
 
 # Obtain image from video stream
-# IP_adress = '192.168.1.11'
-# cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
+IP_adress = '192.168.1.16'
+cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
 
 #Define colour range:(from Finding_HVS.py)
 lower_blue = np.array([104, 80, 63]) 
@@ -21,17 +22,19 @@ frame = 0
 skip_frame = 3 #how many frames we want to skip
 
 while True:
-    # ret, im = cap.read()
-    im = cv2.imread('playing_field2.png')
+    ret, im = cap.read()
+    # im = cv2.imread('playing_field2.png')
 
     if frame > skip_frame:
         imgray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
 
         # Finding of playing field and goal areas
-        blur = cv2.GaussianBlur(imgray,(5,5),0)
-        _,thresh = cv2.threshold(blur,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU) #te veel?
+                                                # blur = cv2.GaussianBlur(imgray,(5,5),0)
+                                                # _,thresh = cv2.threshold(blur,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU) #te veel?
+                                                # _,thresh = cv2.threshold(blur,127,255,cv2.THRESH_BINARY)
+        edges = cv2.Canny(imgray,100,200)
+        contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-        contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         goal = []
         squares = []
         field = []
@@ -40,13 +43,15 @@ while True:
             approx = cv2.approxPolyDP(i,epsilon,True)
 
             #Finding of playing field
-            if len(approx) == 4 and cv2.contourArea(approx)>180000 and cv2.contourArea(approx) < 200000:
+            if len(approx) == 4 and cv2.contourArea(approx)>180000:# and cv2.contourArea(approx) < 3000000:
                 field = [approx]
+                # print(approx)
                 # print('field:', cv2.contourArea(approx))
             #Finding of goal area
-            elif len(approx) == 4 and cv2.contourArea(approx)>8000 and cv2.contourArea(approx) < 9000:
+            elif len(approx) == 4 and cv2.contourArea(approx)>16000 and cv2.contourArea(approx) < 30000:
                 goal.append(approx)
                 # print('goal:',cv2.contourArea(approx))
+        cv2.imshow('',edges)
 
         # Finding of squares
         hsv = cv2.cvtColor(im,cv2.COLOR_BGR2HSV) # image naar HSV waarden omzetten
@@ -70,7 +75,8 @@ while True:
         res_b = cv2.bitwise_and(im,im, mask= mask_b)
         imgray = cv2.cvtColor(res_b,cv2.COLOR_BGR2GRAY)
         blur = cv2.GaussianBlur(imgray,(5,5),0)
-        _,thresh = cv2.threshold(blur,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU) #te veel?
+        # _,thresh = cv2.threshold(blur,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU) #te veel?
+        _,thresh = cv2.threshold(blur,127,255,cv2.THRESH_BINARY)        
         contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         for i in contours:
@@ -113,24 +119,26 @@ while True:
         ### Green
         res_g = cv2.bitwise_and(im,im, mask= mask_g)
         imgray = cv2.cvtColor(res_g,cv2.COLOR_BGR2GRAY)
-        blur = cv2.GaussianBlur(imgray,(5,5),0)
-        _,thresh = cv2.threshold(blur,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU) #te veel?
-        
-        contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # blur = cv2.GaussianBlur(imgray,(5,5),0)
+        # _,thresh = cv2.threshold(blur,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU) #te veel?
+        edges = cv2.Canny(imgray,100,200)
+        contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # cv2.imshow('',edges)
 
         for i in contours:
             epsilon = .1*cv2.arcLength(i,True)
             approx = cv2.approxPolyDP(i,epsilon,True)
-
+            # print(len(approx))
+            # print(cv2.contourArea(approx))
             #Finding of squares
-            if len(approx) == 4 and cv2.contourArea(approx)>180 and cv2.contourArea(approx) < 300:
+            if len(approx) == 4  and cv2.contourArea(approx) < 300: #and cv2.contourArea(approx)>180
                 squares_g.append(approx)
                 # print('square green:', cv2.contourArea(approx))
                 x = int((approx[0,0,0] + approx[1,0,0] + approx[2,0,0] + approx[3,0,0])/4)
                 y = int((approx[0,0,1] + approx[1,0,1] + approx[2,0,1] + approx[3,0,1])/4)
                 # print(x)
                 squares_g_centre.append((x,y))
-                cv2.circle(im, (x,y),radius=5,color=(0,255,0),thickness=-1)
+                # cv2.circle(im, (x,y),radius=5,color=(0,255,0),thickness=-1)
 
                 
         # Drawing of contours
@@ -146,7 +154,7 @@ while True:
         frame += 1
     #Exit if requested: esc
     if cv2.waitKey(1) == 27:
-        print(squares_g_centre)
+        print(field)
         # print()
         exit(0)
 
