@@ -22,7 +22,7 @@ upper_green = np.array([65, 129, 187])
 #Create forever loop
 frame = 0
 skip_frame = 3 #how many frames we want to skip
-warped = None
+warped = 0
 
 while True:
     ret, im = cap.read()
@@ -46,15 +46,16 @@ while True:
                     field.append(i[0])
 
                 pts = np.array(field)
-                warped = four_point_transform(edges, pts)
+                warped, M = four_point_transform(im, pts) #Note: M is transformation matrix
                 break
+
         cv2.imshow("", warped)
 
-
-
+        #https://stackoverflow.com/questions/27251138/perspective-transform-of-an-array-with-coordinates
+        #https://pyimagesearch.com/2014/08/25/4-point-opencv-getperspective-transform-example/ 
 
         # # Finding of squares
-        # hsv = cv2.cvtColor(im,cv2.COLOR_BGR2HSV) # image naar HSV waarden omzetten
+        # hsv = cv2.cvtColor(warped,cv2.COLOR_BGR2HSV) # image naar HSV waarden omzetten
         # ## Threshold the HSV image to get only squares
         # mask_b = cv2.inRange(hsv, lower_blue, upper_blue)
         # mask_r = cv2.inRange(hsv, lower_red, upper_red)
