@@ -6,8 +6,8 @@ from transform import four_point_transform
 
 
 # Obtain image from video stream
-IP_adress = '192.168.1.16'
-cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
+# IP_adress = '192.168.1.16'
+# cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
 
 #Define colour range:(from Finding_HVS.py)
 lower_blue = np.array([104, 80, 63]) 
@@ -21,12 +21,12 @@ upper_green = np.array([65, 129, 187])
 
 #Create forever loop
 frame = 0
-skip_frame = 3 #how many frames we want to skip
+skip_frame = 0 #how many frames we want to skip
 warped = 0
 
 while True:
-    ret, im = cap.read()
-    # im = cv2.imread('playing_field2.png')
+    # ret, im = cap.read()
+    im = cv2.imread('playing_field_black/frame5.jpg')
 
     if frame > skip_frame:
         imgray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
@@ -41,7 +41,7 @@ while True:
             approx = cv2.approxPolyDP(i,epsilon,True)
 
             #Finding of playing field
-            if len(approx) == 4 and cv2.contourArea(approx)>180000:# and cv2.contourArea(approx) < 3000000:
+            if len(approx) == 4 and cv2.contourArea(approx)>190000:# and cv2.contourArea(approx) < 3000000:
                 for i in approx:
                     field.append(i[0])
 
@@ -155,7 +155,6 @@ while True:
         frame += 1
     #Exit if requested: esc
     if cv2.waitKey(1) == 27:
-        # print(field)
         # print()
         exit(0)
 

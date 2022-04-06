@@ -3,15 +3,17 @@ import time
 import numpy as np
 
 # Obtain image from video stream
-IP_adress = '192.168.1.11'
-cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
+# IP_adress = '192.168.1.11'
+# cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
 
 #Create forever loop
 frame = 0
 skip_frame = 3 #how many frames we want to skip
 
 while True:
-    ret, im = cap.read()
+    # ret, im = cap.read()
+    im = cv2.imread('playing_field_black/frame5.jpg')
+
 
     if frame > skip_frame:
         hsv = cv2.cvtColor(im,cv2.COLOR_BGR2HSV) # image naar HSV waarden omzetten

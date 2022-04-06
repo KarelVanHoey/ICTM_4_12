@@ -23,7 +23,7 @@ skip_frame = 3 #how many frames we want to skip
 
 while True:
     # ret, im = cap.read()
-    im = cv2.imread('playing_field2.png')
+    im = cv2.imread('playing_field_black/frame5.jpg')
 
     if frame > skip_frame:
         imgray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
@@ -142,11 +142,11 @@ while True:
 
                 
         # Drawing of contours
-        # cv2.drawContours(im, field, -1, (255,68,204), 3)
-        # cv2.drawContours(im, goal, -1, (50,90,80), 3)
-        # cv2.drawContours(im, squares_r, -1, (0,0,255), 3)        
-        # cv2.drawContours(im, squares_g, -1, (0,255,0), 3)        
-        # cv2.drawContours(im, squares_b, -1, (255,0,0), 3)   
+        cv2.drawContours(im, field, -1, (255,68,204), 3)
+        cv2.drawContours(im, goal, -1, (50,90,80), 3)
+        cv2.drawContours(im, squares_r, -1, (0,0,255), 3)        
+        cv2.drawContours(im, squares_g, -1, (0,255,0), 3)        
+        cv2.drawContours(im, squares_b, -1, (255,0,0), 3)   
         cv2.imshow('',im)
 
         frame = 0 #reset frames
@@ -154,7 +154,7 @@ while True:
         frame += 1
     #Exit if requested: esc
     if cv2.waitKey(1) == 27:
-        print(field)
+        # print(field)
         # print()
         exit(0)
 
