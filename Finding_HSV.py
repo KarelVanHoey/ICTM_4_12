@@ -8,10 +8,10 @@ def nothing(x):
     pass
 
 # Initializing the webcam feed.
-IP_adress = '192.168.1.11'
-cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
-cap.set(3,1280)
-cap.set(4,720)
+# IP_adress = '192.168.1.11'
+# cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
+# cap.set(3,1280)
+# cap.set(4,720)
 
 # Create a window named trackbars.
 cv2.namedWindow("Trackbars")
@@ -30,9 +30,11 @@ cv2.createTrackbar("U - V", "Trackbars", 255, 255, nothing)
 while True:
     
     # Start reading the webcam feed frame by frame.
-    ret, frame = cap.read()
-    if not ret:
-        break
+    # ret, frame = cap.read()
+    frame = cv2.imread('playing_field_black/frame5.jpg')
+
+    # if not ret:
+    #     break
     # Flip the frame horizontally (Not required)
     frame = cv2.flip( frame, 1 ) 
     
@@ -86,5 +88,5 @@ while True:
         break
     
 # Release the camera & destroy the windows.    
-cap.release()
+# frame.release()
 cv2.destroyAllWindows()
