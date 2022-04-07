@@ -21,18 +21,17 @@ upper_green = np.array([179, 255, 255])
 
 #Create forever loop
 frame = 0
-skip_frame = 0 #how many frames we want to skip
+skip_frame = 3 #how many frames we want to skip
 warped = None
 
 while True:
     # ret, im = cap.read()
-    im = cv2.imread('playing_field/playing_field3.png')
+    im = cv2.imread('playing_field_black/frame3.jpg')
 
     if frame > skip_frame:
         imgray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
         edges = cv2.Canny(imgray,20,200) #Note: eerste was origineel 100
         contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
         goal = []
         field = []
 
@@ -50,7 +49,7 @@ while True:
                 break
         # cv2.imshow("", warped)
         #https://stackoverflow.com/questions/27251138/perspective-transform-of-an-array-with-coordinates
-        #https://pyimagesearch.com/2014/08/25/4-point-opencv-getperspective-transform-example/ 
+        #https://pyimagesear    ch.com/2014/08/25/4-point-opencv-getperspective-transform-example/ 
         
         if warped is not None:             #Deze if is nodig als hij in de voorgaande loop geen veld vindt. Hij blijft dan zoeken naar een veld.
             #Finding of field and goals
@@ -106,7 +105,6 @@ while True:
                     y = int((approx[0,0,1] + approx[1,0,1] + approx[2,0,1] + approx[3,0,1])/4)
                     squares_b_centre.append(np.array([x,y]))
                     cv2.circle(im, (x,y),radius=5,color=(255,0,0),thickness=-1)
-
 
             ### Red
             res_r = cv2.bitwise_and(warped,warped, mask= mask_r)

@@ -1,5 +1,5 @@
 
-#finding hsv range of target object(pen)
+#finding hsv range of target object(pen) --> https://gist.github.com/GeekyPRAVEE/248dd1567433e83fab9a8997abe7b8f2
 import cv2
 import numpy as np
 import time
