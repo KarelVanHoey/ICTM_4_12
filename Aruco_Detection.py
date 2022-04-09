@@ -42,6 +42,8 @@ def findAruco(img, draw=True):
     return cX, cY, heading, ids, img, corners
 
 def positioning(cX, cY, heading, ids):
+    our_position = []
+    our_heading = []
     their_position = []
     their_ids = []
     their_heading = []
@@ -54,18 +56,18 @@ def positioning(cX, cY, heading, ids):
             their_ids.append(id)
             their_heading.append(heading[i])
     
-    return our_position, our_heading, their_ids, their_position, their_heading
+    return our_position, our_heading, their_ids, their_position, their_heading  # be careful: all arrays can be empty, so don't assume size!!
 
-# while True:
-#     # _, img = cap.read()
-#     img = cv2.imread("Aruco_Grid_4_12.png")  # make sure path is correct and terminal is in right folder
+while True:
+    # _, img = cap.read()
+    img = cv2.imread("aruco_transformed.png")  # make sure path is correct and terminal is in right folder
 
-#     corners, ids, img = findAruco(img, draw=True)
-#     cv2.imshow("img", img)
-#     if cv2.waitKey(1) == 113:       # Q-key as quit button
-#         break
+    _, _, _, ids, img, corners = findAruco(img, draw=True)
+    cv2.imshow("img", img)
+    if cv2.waitKey(1) == 113:       # Q-key as quit button
+        break
 
-# img = cv2.imread("Aruco_Orientation_3.png")
+# img = cv2.imread("aruco_transformed.png")
 # cX, cY, heading, ids, img, corners = findAruco(img, draw=True)
 # # print("corners =", corners)
 # # print("ids =", ids)
