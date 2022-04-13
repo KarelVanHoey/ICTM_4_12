@@ -1,26 +1,22 @@
 import cv2
 import cv2.aruco as aruco
 import numpy as np
-from contrast import contrast_enhancer
 
-# IP_adress = '192.168.1.15'
+# IP_adress = '192.168.1.16'
 # cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
-# # _, img = cap.read()
+# _, img = cap.read()
 
-def findAruco(img, draw=False):
+def findAruco(img, draw=True):
     # Aruco set-up
-    # marker_size = 5 
-    # total_markers = 50
-    # key = getattr(aruco, 'DICT_5X5_50')        # f'DICT_{marker_size}X{marker_size}_{total_markers}')
-    arucoDict = aruco.Dictionary_get(getattr(aruco, 'DICT_5X5_50'))
+    marker_size = 5 
+    total_markers = 50
+    key = getattr(aruco, f'DICT_{marker_size}X{marker_size}_{total_markers}')
+    arucoDict = aruco.Dictionary_get(key)
     arucoParam = aruco.DetectorParameters_create()
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     corners, ids, rejected = aruco.detectMarkers(gray, arucoDict, parameters=arucoParam)
     
-    if ids is None:
-        ids = np.array([])
-
     ids = ids.flatten()
     cX = np.zeros(len(ids)) # empty arrays to store x and y location of center of aruco markers
     cY = np.zeros(len(ids))
@@ -41,13 +37,10 @@ def findAruco(img, draw=False):
         cY[i] = (zY1[i] + zY2[i]) * 0.5
         heading[i] = np.arctan2(zY2[i] - zY1[i], zX1[i] - zX2[i]) # Pixels: y positive downward --> left-handed coordinate system
                                                                   # chosen here: angle positive counterclockwise with respect to the x direction (like normally)
-    if (draw is not None) and (corners is not None):
+    if draw and corners is not None:
         aruco.drawDetectedMarkers(img, corners)
 
-    if ids is not None:
-        return cX, cY, heading, ids, img, corners
-    else:
-        return [], [], [], [], img, []
+    return cX, cY, heading, ids, img, corners
 
 def positioning(cX, cY, heading, ids):
     our_position = []
@@ -66,30 +59,28 @@ def positioning(cX, cY, heading, ids):
     
     return our_position, our_heading, their_ids, their_position, their_heading  # be careful: all arrays can be empty, so don't assume size!!
 
-# while True:
-#     _, img = cap.read()
-#     # img = cv2.imread("aruco_transformed.png")  # make sure path is correct and terminal is in right folder
+while True:
+    # _, img = cap.read()
+    img = cv2.imread("aruco_transformed.png")  # make sure path is correct and terminal is in right folder
 
-#     # _, _, _, ids, img, corners = findAruco(img)
-#     _, _, _, ids, img, corners = findAruco(contrast_enhancer(img, 2.5, -100))
-#     cv2.imshow('img', img)
-#     if cv2.waitKey(1) == 113:       # Q-key as quit button
-#         break
+    _, _, _, ids, img, corners = findAruco(img, draw=True)
+    cv2.imshow("img", img)
+    if cv2.waitKey(1) == 113:       # Q-key as quit button
+        break
 
+img = cv2.imread("aruco_transformed.png")
+cX, cY, heading, ids, img, corners = findAruco(img, draw=True)
+# print("corners =", corners)
+# print("ids =", ids)
+print(cX)
+print(cY)
+print(ids)
+# print(corners)
+print(heading * 180 / np.pi)
 
-# img = cv2.imread("aruco_transformed.png")
-# cX, cY, heading, ids, img, corners = findAruco(img, draw=True)
-# # print("corners =", corners)
-# # print("ids =", ids)
-# print(cX)
-# print(cY)
-# print(ids)
-# # print(corners)
-# print(heading * 180 / np.pi)
-
-# our_pos, our_heading, their_ids, their_pos, their_heading = positioning(cX, cY, heading, ids)
-# print(our_pos)
-# print(our_heading[0] * 180 / np.pi)
-# print(their_ids)
-# print(their_pos)
-# print(their_heading)
+our_pos, our_heading, their_ids, their_pos, their_heading = positioning(cX, cY, heading, ids)
+print(our_pos)
+print(our_heading[0] * 180 / np.pi)
+print(their_ids)
+print(their_pos)
+print(their_heading)

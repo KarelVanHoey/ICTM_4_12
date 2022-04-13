@@ -3,7 +3,7 @@ import cv2
 
 # --> https://pyimagesearch.com/2014/08/25/4-point-opencv-getperspective-transform-example/ 
 def order_points(pts):
-	# initialzie a list of coordinates that will be ordered
+	# initialize a list of coordinates that will be ordered
 	# such that the first entry in the list is the top-left,
 	# the second entry is the top-right, the third is the
 	# bottom-right, and the fourth is the bottom-left
