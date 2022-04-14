@@ -5,6 +5,7 @@ from contrast import contrast_enhancer
 
 IP_adress = '192.168.1.15'
 cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
+# cap = cv2.VideoCapture(0)
 # # _, img = cap.read()
 
 def findAruco(img, draw=False):
