@@ -5,11 +5,12 @@ import keyboard
 from Aruco_Detection import findAruco, positioning
 import numpy as np
 import cv2
-import cv2.aruco as aruco
 from contrast import contrast_enhancer
+import copy
 # testing script: bluetooth communication + live (2 s interval) aruco detection and localization + RC car
 
 exitFlag = 0
+img = None
 
 class ServerSendThread(threading.Thread): # defines class used in the thread that sends data to the robot
 
@@ -40,26 +41,54 @@ class ArucoLocationHeadingThread(threading.Thread): # defines class used in the 
                                                     # now it's implemented with contrast enhanced, non transformed images
     def __init__(self):
         threading.Thread.__init__(self)
-        self.IP_adress = '192.168.1.15'
-        self.cap = cv2.VideoCapture('http://'+self.IP_adress+':8000/stream.mjpg')
+        # self.IP_adress = '192.168.1.15'
+        # self.cap = cv2.VideoCapture('http://'+self.IP_adress+':8000/stream.mjpg')
         # self.cap = cv2.VideoCapture(0)
         # self.img = cv2.imread('Aruco_Orientation_3.png')
     
     def run(self):
         global exitFlag
+        global img
+        image_available = False
         while exitFlag == 0:
-            _, self.img = self.cap.read()
-            cX, cY, heading, ids, img, corners = findAruco(contrast_enhancer(self.img, 1.8, -50))
-            our_position, our_heading, their_ids, their_position, their_heading = positioning(cX, cY, heading, ids)
-            print('our position (aruco) =', our_position)
-            if our_heading != []:
-                print('our heading (aruco)  =', our_heading[0] / np.pi * 180, '°')
-            else:
-                print('our heading (aruco)  =', [])
-            print(len(ids))
-            time.sleep(3)
-            if keyboard.is_pressed('t'):
-                exitFlag = 1
+            # _, self.img = self.cap.read()
+
+            camera_lock.acquire()
+            if img is not None:
+                image_available = True
+                self.img = copy.deepcopy(img)
+            camera_lock.release()
+
+            if image_available:
+                cX, cY, heading, ids, img, corners = findAruco(contrast_enhancer(self.img, 1.8, -50))
+                our_position, our_heading, their_ids, their_position, their_heading = positioning(cX, cY, heading, ids)
+                print('our position (aruco) =', our_position)
+                if our_heading != []:
+                    print('our heading (aruco)  =', our_heading[0] / np.pi * 180, '°')
+                else:
+                    print('our heading (aruco)  =', [])
+                print(len(ids))
+                time.sleep(0.05)
+                if keyboard.is_pressed('t'):
+                    exitFlag = 1
+
+class CameraFootage(threading.Thread):
+
+    def __init__(self):
+        threading.Thread.__init__(self)
+        # self.IP_adress = '192.168.1.15'
+        # self.cap = cv2.VideoCapture('http://'+self.IP_adress+':8000/stream.mjpg')
+        self.cap = cv2.VideoCapture(0)
+    
+    def run(self):
+        global exitFlag
+        global img
+        while exitFlag == 0:
+            _, local_img = self.cap.read()
+            camera_lock.acquire()
+            img = copy.deepcopy(local_img)
+            camera_lock.release()
+            # time.sleep(0.05)
 
 
 def server_send(threadName, port): # sends commands to robot based in keyboard input
@@ -117,22 +146,18 @@ def server_receive(threadName, port): # prints received messages from robot
 sendport = 28
 receiveport = 29
 
+# Create semaphores/mutex/locks
+camera_lock = threading.Lock()
+
 # Create new threads
 thread1 = ServerSendThread("sendthread", sendport)
 thread2 = ServerReceiveThread("receivethread", receiveport)
-thread3 = ArucoLocationHeadingThread()
+thread3 = CameraFootage()
+thread4 = ArucoLocationHeadingThread()
+
 
 # Start new Threads
 thread1.start()
 thread2.start()
 thread3.start()
-
-thread1.join() # this was added in the hope that the threads would stop with the exitFlag, but doesn't work yet (also not very important)
-thread2.join()
-thread3.join()
-
-# while True:
-#     if img is not None:
-#         cv2.imshow("enhanced contrast", img)
-#     if cv2.waitKey(1) == 113:       # Q-key as quit button
-#         break
+thread4.start()
