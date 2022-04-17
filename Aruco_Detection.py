@@ -49,6 +49,7 @@ def findAruco(img, draw=False):
     else:
         return [], [], [], [], img, []
 
+
 def positioning(cX, cY, heading, ids):
     our_position = []
     our_heading = []
@@ -65,6 +66,25 @@ def positioning(cX, cY, heading, ids):
             their_heading.append(heading[i])
     
     return our_position, our_heading, their_ids, their_position, their_heading  # be careful: all arrays can be empty, so don't assume size!!
+
+
+def distanceAruco(our_position, our_heading, their_position):
+    distance = []       # absolute distance between our and other robot
+    angle = []          # angle in global coordinate system  of line between our and other robot
+    rel_angle = []      # angle to other robot as seen from our robot
+    if our_position != [] and their_position != []:
+        for x_i, y_i in their_position:
+            distance.append(np.sqrt((x_i - our_position[0])**2 + (y_i - our_position[1])**2))
+            angle.append(np.arctan2(y_i - our_position[0], x_i - our_position[1]))
+            rel_angle_temp = angle[-1] - our_heading[0]
+            if rel_angle_temp < (-1) * np.pi:
+                rel_angle_temp += 2 * np.pi
+            elif rel_angle_temp > np.pi:
+                rel_angle_temp -= 2 * np.pi
+            rel_angle.append(rel_angle_temp)
+    
+    return distance, angle, rel_angle
+
 
 # while True:
 #     _, img = cap.read()
