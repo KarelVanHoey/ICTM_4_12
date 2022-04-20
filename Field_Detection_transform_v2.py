@@ -6,8 +6,8 @@ from transform import four_point_transform
 
 
 # Obtain image from video stream
-# IP_adress = '192.168.1.16'
-# cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
+IP_adress = '192.168.1.15'
+cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
 
 #Define colour range:(from Finding_HVS.py)
 lower_blue = np.array([22, 116, 61]) 
@@ -22,19 +22,25 @@ upper_green = np.array([179, 255, 255])
 #Create forever loop
 frame = 0
 skip_frame = 3 #how many frames we want to skip
+
+
 warped = None
 
 while True:
-    # ret, im = cap.read()
-    im = cv2.imread('playing_field_black/frame3.jpg')
+    ret, im = cap.read()
+    # im = cv2.imread('playing_field_black/frame3.jpg')
 
     if frame > skip_frame:
-        imgray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
-        edges = cv2.Canny(imgray,20,200) #Note: eerste was origineel 100
-        contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        
         goal = []
         field = []
 
+
+        imgray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
+        edges = cv2.Canny(imgray,20,200) #Note: eerste was origineel 100
+        contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        
+        # imshow('',edges)
         for i in contours:
             epsilon = .1*cv2.arcLength(i,True)
             approx = cv2.approxPolyDP(i,epsilon,True)
