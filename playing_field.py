@@ -13,7 +13,7 @@ def init(cap, skip_frame=3):
         
         
         # ret, im = cap.read()
-        im = cv2.imread('playing_field_black_pictures/frame3.jpg')
+        im = cv2.imread('playing_field_black_pictures/frame5.jpg')
         
         if frame > skip_frame:
             
@@ -42,10 +42,55 @@ def init(cap, skip_frame=3):
         if cv2.waitKey(1) == 27:
             # print(warped)
             exit(0)
-    return warped, pts
+
+    # Goals and field
+    goal = []
+    goal_centre = []
+    field = []
+
+    averages = [] # --> to not get duplicates in goals
+    # _, im = cap.read()
+
+    imgray = cv2.cvtColor(warped,cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(imgray,20,100) #Note: met grijze goal was 2e 200
+    contours, _ = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    ### NOTE: while loop might be needed if we only find 1 goal ###
+    # while len(goal) < 2:
+
+    for i in contours:
+        epsilon = .1*cv2.arcLength(i,True)
+        approx = cv2.approxPolyDP(i,epsilon,True)
+        av = int(np.average(approx))
+        # print(av)
+        if len(approx) == 4 and cv2.contourArea(approx)>18000:
+            # for i in approx:
+            #     field.append(i[0])
+
+            # pts = np.array(field)
+            # print(pts)
+            # recta = order_points(pts)
+            # print(recta)
+            field = [approx]
+            
+            # print('field:', cv2.contourArea(approx)) #Opmerking: met vaste grootte van veld: binnen opp >185000 en buitenopp niet vindbaar (wel via hoekpunten coord.)
+        elif len(approx) == 4 and cv2.contourArea(approx)>12000 and cv2.contourArea(approx) < 15000 and av not in averages:
+            goal.append(approx)
+            averages.extend(range(av-5, av+5))
+            # print('goal:',cv2.contourArea(approx)) #Opmerking: met vaste grootte van veld: binnen opp >8000 en buitenopp >12000
+            x = int((approx[0,0,0] + approx[1,0,0] + approx[2,0,0] + approx[3,0,0])/4)
+            y = int((approx[0,0,1] + approx[1,0,1] + approx[2,0,1] + approx[3,0,1])/4)
+            goal_centre.append(np.array([x,y]))
+
+    return warped, pts, goal, goal_centre, field
 
 
 def recognition(cap, pts):
+    # Image processing
+    # _, im = cap.read()
+    im = cv2.imread('playing_field_black_pictures/frame5.jpg')
+    warped = four_point_transform(im, pts)
+
     # Colour ranges:
     lower_blue = np.array([22, 116, 61]) 
     upper_blue = np.array([179, 255, 255]) 
@@ -56,39 +101,7 @@ def recognition(cap, pts):
     lower_green = np.array([17, 75, 102]) 
     upper_green = np.array([179, 255, 255])
 
-    # Goals and field
-    goal = []
-    goal_centre = []
-    field = []
-    # _, im = cap.read()
-    im = cv2.imread('playing_field_black_pictures/frame3.jpg')
-    warped = four_point_transform(im, pts)
-
-    imgray = cv2.cvtColor(warped,cv2.COLOR_BGR2GRAY)
-    edges = cv2.Canny(imgray,20,100) #Note: met grijze goal was 2e 200
-    contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    for i in contours:
-        epsilon = .1*cv2.arcLength(i,True)
-        approx = cv2.approxPolyDP(i,epsilon,True)
-
-        if len(approx) == 4 and cv2.contourArea(approx)>18000:
-            # for i in approx:
-            #     field.append(i[0])
-
-            # pts = np.array(field)
-            # print(pts)
-            # recta = order_points(pts)
-            # print(recta)
-            field = [approx]
-            # print(approx)
-            # print('field:', cv2.contourArea(approx)) #Opmerking: met vaste grootte van veld: binnen opp >185000 en buitenopp niet vindbaar (wel via hoekpunten coord.)
-        elif len(approx) == 4 and cv2.contourArea(approx)>12000 and cv2.contourArea(approx) < 15000:
-            goal.append(approx)
-            # print('goal:',cv2.contourArea(approx)) #Opmerking: met vaste grootte van veld: binnen opp >8000 en buitenopp >12000
-            x = int((approx[0,0,0] + approx[1,0,0] + approx[2,0,0] + approx[3,0,0])/4)
-            y = int((approx[0,0,1] + approx[1,0,1] + approx[2,0,1] + approx[3,0,1])/4)
-            goal_centre.append(np.array([x,y]))
+    
     
     # Finding of squares
     hsv = cv2.cvtColor(warped,cv2.COLOR_BGR2HSV) # image naar HSV waarden omzetten
@@ -177,4 +190,19 @@ def recognition(cap, pts):
     # cv2.drawContours(warped, squares_g, -1, (0,255,0), 3)        
     # cv2.drawContours(warped, squares_b, -1, (255,0,0), 3)   
     # cv2.imshow('',warped)
-    return warped, goal, goal_centre, field, squares_b_centre, squares_g_centre, squares_r_centre
+    return warped, squares_b_centre, squares_g_centre, squares_r_centre
+
+def goal_allocation(friendly_aruco, goals, goal_centres):
+    if len(goals) != 2:
+        print("HELP! Meer dan 2 scoorzones")
+        return
+    # print(goals[0][0][0][0])
+    elif friendly_aruco[0] > goals[0][0][0][0] and friendly_aruco[0] < goals[0][1][0][0]: #kunnen ook nog y waarden specifieren, maar op zich niet nodig
+        friendly = goals[0]
+        enemy = goals[1]
+        enemy_centre = goal_centres[1]
+    else:
+        friendly = goals[1]
+        enemy = goals[0]
+        enemy_centre = goal_centres[0]
+    return friendly, enemy, enemy_centre
