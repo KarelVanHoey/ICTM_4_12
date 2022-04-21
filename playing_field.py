@@ -58,6 +58,7 @@ def recognition(cap, pts):
 
     # Goals and field
     goal = []
+    goal_centre = []
     field = []
     # _, im = cap.read()
     im = cv2.imread('playing_field_black_pictures/frame3.jpg')
@@ -85,6 +86,9 @@ def recognition(cap, pts):
         elif len(approx) == 4 and cv2.contourArea(approx)>12000 and cv2.contourArea(approx) < 15000:
             goal.append(approx)
             # print('goal:',cv2.contourArea(approx)) #Opmerking: met vaste grootte van veld: binnen opp >8000 en buitenopp >12000
+            x = int((approx[0,0,0] + approx[1,0,0] + approx[2,0,0] + approx[3,0,0])/4)
+            y = int((approx[0,0,1] + approx[1,0,1] + approx[2,0,1] + approx[3,0,1])/4)
+            goal_centre.append(np.array([x,y]))
     
     # Finding of squares
     hsv = cv2.cvtColor(warped,cv2.COLOR_BGR2HSV) # image naar HSV waarden omzetten
@@ -173,4 +177,4 @@ def recognition(cap, pts):
     # cv2.drawContours(warped, squares_g, -1, (0,255,0), 3)        
     # cv2.drawContours(warped, squares_b, -1, (255,0,0), 3)   
     # cv2.imshow('',warped)
-    return warped, goal, field, squares_b_centre, squares_g_centre, squares_r_centre
+    return warped, goal, goal_centre, field, squares_b_centre, squares_g_centre, squares_r_centre

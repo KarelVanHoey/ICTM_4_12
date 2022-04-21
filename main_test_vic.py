@@ -4,6 +4,7 @@ from cv2 import imshow
 import numpy as np
 from transform import four_point_transform
 from playing_field import init, recognition
+from distance import next_target
 
 
 # Obtain image from video stream
@@ -11,29 +12,33 @@ from playing_field import init, recognition
 # cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
 cap = None
 # Initialisation of field
-tic = time.clock()
 warped, pts = init(cap)
-toc = time.clock()
-print(toc-tic)
+i=0
+t = []
 # Rest of recognition
 while True:
     red = []
     green = []
     blue = []
-    # imshow('',warped)
 
     # Giving of warped image, finding of vertices of goals, inner field and giving of coordinates
-    tic = time.clock()
-    warped, goal, field, blue, green, red = recognition(cap, pts)
-    toc = time.clock()
-    print(toc-tic)
+    warped, goal, goal_centre, field, blue, green, red = recognition(cap, pts)
     # cv2.drawContours(warped, field, -1, (255,68,204), 3)
     # cv2.drawContours(warped, goal, -1, (50,90,80), 3)
     # cv2.circle(warped, green[0],radius=5,color=(255,0,0),thickness=-1)  
     # cv2.imshow('',warped)
-    # print(goal)
-    # break
+    # print(green)
+    target = next_target([100,300], goal_centre[3],green,red,blue)
+
+    cv2.drawContours(warped, field, -1, (255,68,204), 3)
+    cv2.drawContours(warped, goal, -1, (50,90,80), 3)
+    cv2.circle(warped, target,radius=5,color=(255,0,0),thickness=-1) 
+    cv2.circle(warped, [100,300],radius=5,color=(0,0,0),thickness=-1)   
+    cv2.imshow('',warped)
     #Exit if requested: esc
-    print(field)
+    i+=1
     if cv2.waitKey(1) == 27:
         break
+print(green)
+print(target)
+# print(len(blue))
