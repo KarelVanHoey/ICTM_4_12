@@ -196,7 +196,7 @@ def goal_allocation(friendly_aruco, goals, goal_centres):
     if len(goals) != 2:
         print("HELP! Meer dan 2 scoorzones")
         return
-    # print(goals[0][0][0][0])
+    #NOTE: we gaan goals echt wel moeten sorteren!
     elif friendly_aruco[0] > goals[0][0][0][0] and friendly_aruco[0] < goals[0][1][0][0]: #kunnen ook nog y waarden specifieren, maar op zich niet nodig
         friendly = goals[0]
         enemy = goals[1]
