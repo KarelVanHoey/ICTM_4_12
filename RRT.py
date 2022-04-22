@@ -44,7 +44,9 @@ def main():
         if iteration % 5 == 0:
             pygame.display.update()
         iteration += 1
+    print(X,Y)
     map.drawPath(graph.getPathCoords())
+    
     pygame.display.update()
     pygame.event.clear()
     pygame.event.wait(0)
