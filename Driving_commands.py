@@ -53,9 +53,11 @@ class RRT_Drive:
         th = self.get_angle()
         dis = self.get_distance()
         for i in range(n_movements):
+            #Turn in right direction
             LM.run_angle(turn_rate, th[i],wait=False)
             RM.run_angle(-turn_rate, -th[i],wait=True)
 
+            #Move to next node
             degrees_to_turn = dis*meters_per_pixles/(D_wheel/2)*180/np.pi
             LM.run_angle(forward_speed,degrees_to_turn,wait=False)
             RM.run_angle(forward_speed,degrees_to_turn,wait=False)
