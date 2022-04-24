@@ -1,7 +1,21 @@
+from pybricks.hubs import EV3Brick
+from pybricks.ev3devices import (Motor, TouchSensor, ColorSensor, InfraredSensor, UltrasonicSensor, GyroSensor)
+from pybricks.parameters import Port, Stop, Direction, Button, Color
+from pybricks.tools import wait, StopWatch, DataLog
+from pybricks.robotics import DriveBase
+from pybricks.media.ev3dev import SoundFile, ImageFile
 import pygame
 from RRTbasePy import RRTGraph
 from RRTbasePy import RRTMap
+from Driving_commands import RRT_Drive
 import time
+
+
+ev3 = EV3Brick()
+LM = Motor(Port.A, Direction.CLOCKWISE) #left motor
+RM = Motor(Port.D, Direction.CLOCKWISE) #right motor
+FM = Motor(Port.B, Direction.CLOCKWISE) #Front motor
+
 
 def main():
     dimensions =(512,512)
@@ -45,6 +59,23 @@ def main():
             pygame.display.update()
         iteration += 1
     map.drawPath(graph.getPathCoords())
+
+
+
+    Xs, Ys = ([], [])
+    for e in graph.getPathCoords():
+        Xs.append(e[0])
+        Ys.append(e[1])
+    print("\n")
+    print("Xs: ", Xs)
+    print("Ys: ", Ys)
+    instructions = RRT_Drive(Xs,Ys)
+    print("angles: ", instructions.get_angle())
+    print("distances: ", instructions.get_distance())
+    print("\n")
+
+
+    
     pygame.display.update()
     pygame.event.clear()
     pygame.event.wait(0)
@@ -59,30 +90,5 @@ if __name__ == '__main__':
             result=True
         except:
             result=False
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
