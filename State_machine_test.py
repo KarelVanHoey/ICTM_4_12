@@ -1,3 +1,5 @@
+import smach
+
 from statemachine import StateMachine, State
 
 class MachineState(StateMachine):
@@ -6,5 +8,3 @@ class MachineState(StateMachine):
     Avoid_Collision = State('pick block')
     Go_Dropzone = State('pick block')
     Drop_Block = State('pick block')
-
-
