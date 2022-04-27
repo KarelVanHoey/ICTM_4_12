@@ -55,6 +55,7 @@ class COLLISION(smach.State):
     def execute(self, userdata):
         while dist < 150:
             # Your state execution goes here
+            
         if x==1:
             return 'out1'
         elif x==2:
@@ -72,5 +73,3 @@ while True:
         smach.StateMachine.add('GO_ZONE', GO_ZONE(), transitions={'error3':'COLLISION','outcome3':'DROP'})
         smach.StateMachine.add('DROP', DROP(), transitions={'error4':'COLLISION','outcome4':'GO_BLOCK'})
         smach.StateMachine.add('COLLISION', COLLISION(), transitions={'out1':'GO_BLOCK','out2':'CLAIM','out3':'GO_ZONE','out4':'DROP'})
-    if waitKey(1) == 113:       # Q-key as quit button
-        break
