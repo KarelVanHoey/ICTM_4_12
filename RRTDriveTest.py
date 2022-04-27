@@ -1,36 +1,35 @@
-from pybricks.hubs import EV3Brick
-from pybricks.ev3devices import (Motor, TouchSensor, ColorSensor, InfraredSensor, UltrasonicSensor, GyroSensor)
-from pybricks.parameters import Port, Stop, Direction, Button, Color
-from pybricks.tools import wait, StopWatch, DataLog
-from pybricks.robotics import DriveBase
-from pybricks.media.ev3dev import SoundFile, ImageFile
 import pygame
-from RRTbasePy import RRTGraph
-from RRTbasePy import RRTMap
+from RRT_Game import RRTGraph
+from RRT_Game import RRTMap
 from Driving_commands import RRT_Drive
 import time
-
-
-ev3 = EV3Brick()
-LM = Motor(Port.A, Direction.CLOCKWISE) #left motor
-RM = Motor(Port.D, Direction.CLOCKWISE) #right motor
-FM = Motor(Port.B, Direction.CLOCKWISE) #Front motor
-
+from playing_field import init, recognition
+import cv2
 
 def main():
     dimensions =(512,512)
     start=(50,50)
-    goal=(300,300)
     obsdim=30
-    obsnum=50
+    obstacle_coords = []
+    cap = None
+    warped, pts, goal, goal_centre, field = init(cap)
+    print("hiero: ", goal,"centers:", goal_centre)
+    goal=(300,300)
+    _, blue, green, red = recognition(cap,pts)
+    print("brg: ", [blue,green,red])
+    for e in [blue,green,red]:
+        for i in range(len(e)):
+            obstacle_coords.append(list(e[i]))
+    print("obs_coords", obstacle_coords)
     iteration=0
     t1=0
 
     pygame.init()
-    map=RRTMap(start,goal,dimensions,obsdim,obsnum)
-    graph=RRTGraph(start,goal,dimensions,obsdim,obsnum)
+    map=RRTMap(start,goal,dimensions,obsdim,obstacle_coords)
+    graph=RRTGraph(start,goal,dimensions,obsdim,obstacle_coords)
 
     obstacles=graph.makeobs()
+    print(obstacles)
     map.drawMap(obstacles)
 
     t1=time.time()
@@ -69,6 +68,7 @@ def main():
         Ys.append(e[1])
     Xs.reverse()
     Ys.reverse()
+    #RRT_Drive.execute_movements(len(Xs),Xs,Ys,100,1080)
     print("\n")
     print("Xs: ", Xs)
     print("Ys: ", Ys)
@@ -81,7 +81,7 @@ def main():
     
     pygame.display.update()
     pygame.event.clear()
-    pygame.event.wait(0)
+    pygame.event.wait(500)
 
 
 
@@ -93,5 +93,4 @@ if __name__ == '__main__':
             result=True
         except:
             result=False
-
 

@@ -63,9 +63,12 @@ def main():
 
 
     Xs, Ys = ([], [])
+    l = len(graph.getPathCoords())
     for e in graph.getPathCoords():
         Xs.append(e[0])
         Ys.append(e[1])
+    Xs.reverse()
+    Ys.reverse()
     print("\n")
     print("Xs: ", Xs)
     print("Ys: ", Ys)
