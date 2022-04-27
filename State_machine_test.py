@@ -1,12 +1,27 @@
 import smach
 
+#Initiation
+#   Transformation
+#   playing field recognition
+#   direction enemy check (Aruco_detection_testing.py) -> make Get_enemy_info.py from latest function
+
+#previous state ===> global x
+
 class GO_BLOCK(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['error1', 'outcome1'])
     def execute(self, userdata):
+        global x
         x=1
-        while dist >= 150:
-            # Your state execution goes here
+        while distance >= 150:
+            #Aruco detection
+            #Your state execution goes here
+            #Calculate cost and select
+            #Path planning (angle & distance)
+            #make stack
+            #Push stack
+            #(drive to block)
+            #till dist to block return
             return 'outcome1'
         return 'error1'
 
@@ -14,9 +29,13 @@ class CLAIM(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['error2', 'outcome2'])
     def execute(self, userdata):
+        global x
         x=2
-        while dist >= 150:
-            # Your state execution goes here
+        while distance >= 150:
+            #Drive over
+            #check sensor
+            #lock gate
+            #return
             return 'outcome2'
         return 'error2'
             
@@ -24,9 +43,15 @@ class GO_ZONE(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['error3', 'outcome3'])
     def execute(self, userdata):
+        global x
         x=3
-        while dist >= 150:
-            # Your state execution goes here
+        while distance >= 150:
+            #Check empty space in zone?
+            # calculate path
+            # calculate stack
+            # push stack
+            # once arrived, check if in zone
+            # return
             return 'outcome3'
         return 'error3'
             
@@ -34,9 +59,12 @@ class DROP(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['error4', 'outcome4'])
     def execute(self, userdata):
+        global x
         x=4
-        while dist >= 150:
-            # Your state execution goes here
+        while distance >= 150:
+            # Open gate
+            # drive backward 220mm (measured!)
+            # go to return
             return 'outcome4'
         return 'error4'
 
@@ -44,8 +72,10 @@ class COLLISION(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['out1', 'out2','out3', 'out4'])
     def execute(self, userdata):
-        while dist < 150:
-            # Your state execution goes here
+        global x
+        while distance < 150:
+            # check intersect
+            # calculate safe route out
             x=37
         if x==1:
             return 'out1'
