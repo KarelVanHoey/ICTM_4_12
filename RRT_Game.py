@@ -32,11 +32,8 @@ class RRTMap:
         self.white = (255, 255, 255)
 
     def drawMap(self, obstacles):
-        print("Marker 000")
         pygame.draw.circle(self.map, self.Green, self.start, self.nodeRad + 5, 0)
-        print("Marker 00", self.goal)
         pygame.draw.circle(self.map, self.Green, self.goal, self.nodeRad + 20, 1)
-        print("Marker 0")
         self.drawObs(obstacles)
 
     def drawPath(self, path):
