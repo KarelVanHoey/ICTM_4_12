@@ -5,6 +5,10 @@ from pybricks.parameters import Port, Stop, Direction, Button, Color
 from pybricks.tools import wait, StopWatch, DataLog
 from pybricks.robotics import DriveBase
 from pybricks.media.ev3dev import SoundFile, ImageFile
+import cv2
+
+from Aruco_Detection import positioning, findAruco
+#import Aruco_Detection
 
 #GOALS/STRATEGY:
 #Input list of X and Y coordinates from RRT.py
@@ -23,6 +27,7 @@ FM = Motor(Port.B, Direction.CLOCKWISE) #Front motor
 
 meters_per_pixles = 0.00526834
 D_wheel = 0.05
+Track_width = 0.125 
 
 class RRT_Drive:
     def __init__(self,X,Y):
@@ -36,12 +41,17 @@ class RRT_Drive:
         for i in range(0,self.number_of_nodes-1):
             if self.X[i+1]-self.X[i] == 0:
                 if self.Y[i+1]-self.Y[i] > 0:
-                    th.append(-90)
-                else:
                     th.append(90)
+                else:
+                    th.append(-90)
             else:
                 th.append(round(np.arctan((self.Y[i+1]-self.Y[i])/(self.X[i+1]-self.X[i]))*180/np.pi,1))
-        return th
+        cX, cY, heading, ids, img, corners = findAruco(cv2.imread('playing_field_black_pictures/frame5.jpg'))
+        comm = [positioning(cX,cY,heading,ids)[1]]
+        #comm = ["starting angle"]
+        for i in range(1,len(th)):
+            comm.append(round(th[i]-th[i-1],1))
+        return comm
     
     def get_distance(self):
         dis = []
@@ -49,16 +59,22 @@ class RRT_Drive:
             dis.append(round(np.sqrt((self.X[i+1]-self.X[i])**2+(self.Y[i+1]-self.Y[i])**2),1))
         return dis
 
-    def execute_movements(self,n_movements,turn_rate=90,forward_speed=1080):
-        th = self.get_angle()
-        dis = self.get_distance()
+    def execute_movements(self,Xs,Ys,n_movements,turn_rate=100,forward_speed=1080):
+        instructions = RRT_Drive(Xs,Ys)
+        th = instructions.get_angle()
+        dis = instructions.get_distance()
+        meters_per_pixles = 0.00526834
+        D_wheel = 0.05
+        Track_width = 0.125 
         for i in range(n_movements):
             #Turn in right direction
-            LM.run_angle(turn_rate, th[i],wait=False)
-            RM.run_angle(-turn_rate, -th[i],wait=True)
+            degrees_to_turn = Track_width/D_wheel*th[i]
 
-            #Move to next node
-            degrees_to_turn = dis*meters_per_pixles/(D_wheel/2)*180/np.pi
-            LM.run_angle(forward_speed,degrees_to_turn,wait=False)
-            RM.run_angle(forward_speed,degrees_to_turn,wait=False)
+            LM.on_for_degrees(turn_rate, th[i])
+            RM.on_for_degrees(turn_rate, -th[i])
+
+            #Move towards next node
+            degrees_to_turn = dis[i]*meters_per_pixles/(D_wheel*np.pi)*360
+            LM.on_for_degrees(forward_speed,degrees_to_turn)
+            RM.on_for_degrees(forward_speed,degrees_to_turn)
 
