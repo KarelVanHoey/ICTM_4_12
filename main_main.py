@@ -34,9 +34,9 @@ while True:
 
     # Giving of warped image, finding of vertices of goals, inner field and giving of coordinates
 
-    warped, blue, green, red = recognition(cap, pts,HSV_blue,HSV_red,HSV_green)
+    warped, blue_in, green_in, red_in, blue_out, green_out, red_out = recognition(cap, pts, enemy_goal, HSV_blue,HSV_red,HSV_green)
 
-    target = next_target(aruco_friend, enemy_goal_centre,green,red,blue)
+    target = next_target(aruco_friend, enemy_goal_centre,green_out,red_out,blue_out)
     toc = time.process_time_ns()
     cv2.drawContours(warped, field, -1, (255,68,204), 3)
     cv2.drawContours(warped, [np.array(friendly_goal,dtype="int32")], -1, (50,90,80), 3) #Note: deze structuur is nodig om normale array te kunnen gebruiken

@@ -66,7 +66,6 @@ def init(cap, skip_frame=3):
                 
                 # print('field:', cv2.contourArea(approx)) #Opmerking: met vaste grootte van veld: binnen opp >185000 en buitenopp niet vindbaar (wel via hoekpunten coord.)
             elif len(approx) == 4 and cv2.contourArea(approx)>12000 and cv2.contourArea(approx) < 15000 and av not in averages:
-                # approx_alt = [approx[0,0],approx[1,0],approx[2,0],approx[3,0]]
                 help = []
                 for i in approx:
                     help.append(i[0])
@@ -81,7 +80,7 @@ def init(cap, skip_frame=3):
     return warped, pts, goal, goal_centre, field
 
 
-def recognition(cap, pts, HSV_blue, HSV_red, HSV_green):
+def recognition(cap, pts, enemy, HSV_blue, HSV_red, HSV_green):
     # Image processing
     _, im = cap.read()
     # im = cv2.imread('playing_field_black_pictures/frame5.jpg')
@@ -102,9 +101,13 @@ def recognition(cap, pts, HSV_blue, HSV_red, HSV_green):
     squares_b = []
     squares_g = []
 
-    squares_r_centre = []
-    squares_b_centre = []
-    squares_g_centre = []
+    squares_r_centre_in = []
+    squares_b_centre_in = []
+    squares_g_centre_in = []
+
+    squares_r_centre_out = []
+    squares_b_centre_out = []
+    squares_g_centre_out = []
 
 
     
@@ -120,12 +123,14 @@ def recognition(cap, pts, HSV_blue, HSV_red, HSV_green):
 
         #Finding of squares
         if len(approx) == 4 and cv2.contourArea(approx)>100 and cv2.contourArea(approx) < 300:
-            squares_b.append(approx)
-            # print('square blue:', cv2.contourArea(approx))
             x = int((approx[0,0,0] + approx[1,0,0] + approx[2,0,0] + approx[3,0,0])/4)
             y = int((approx[0,0,1] + approx[1,0,1] + approx[2,0,1] + approx[3,0,1])/4)
-            squares_b_centre.append(np.array([x,y]))
-            cv2.circle(im, (x,y),radius=5,color=(255,0,0),thickness=-1)
+
+            #Looking if squares are in enemy scoring zone
+            if x  > enemy[0,0] and x < enemy[1,0] and  y > enemy[0,1] and y < enemy[2,1]:
+                squares_b_centre_in.append(np.array([x,y]))
+            else: 
+                squares_b_centre_out.append(np.array([x,y]))
 
     ### Red
     res_r = cv2.bitwise_and(warped,warped, mask= mask_r)
@@ -139,12 +144,14 @@ def recognition(cap, pts, HSV_blue, HSV_red, HSV_green):
 
         #Finding of squares
         if len(approx) == 4 and cv2.contourArea(approx)>100 and cv2.contourArea(approx) < 300:
-            squares_r.append(approx)
-            # print('square red:', cv2.contourArea(approx))
             x = int((approx[0,0,0] + approx[1,0,0] + approx[2,0,0] + approx[3,0,0])/4)
             y = int((approx[0,0,1] + approx[1,0,1] + approx[2,0,1] + approx[3,0,1])/4)
-            squares_r_centre.append(np.array([x,y]))
-            cv2.circle(im, (x,y),radius=5,color=(0,0,255),thickness=-1)
+            
+            #Looking if squares are in enemy scoring zone
+            if x  > enemy[0,0] and x < enemy[1,0] and  y > enemy[0,1] and y < enemy[2,1]:
+                squares_r_centre_in.append(np.array([x,y]))
+            else: 
+                squares_r_centre_out.append(np.array([x,y]))
 
             
 
@@ -157,18 +164,17 @@ def recognition(cap, pts, HSV_blue, HSV_red, HSV_green):
     for i in contours:
         epsilon = .1*cv2.arcLength(i,True)
         approx = cv2.approxPolyDP(i,epsilon,True)
-        # print(len(approx))
-        # print(cv2.contourArea(approx))
+        
         #Finding of squares
         if len(approx) == 4  and cv2.contourArea(approx)>100 and cv2.contourArea(approx) < 300: 
-            squares_g.append(approx)
-            # print('square green:', cv2.contourArea(approx))
             x = int((approx[0,0,0] + approx[1,0,0] + approx[2,0,0] + approx[3,0,0])/4)
             y = int((approx[0,0,1] + approx[1,0,1] + approx[2,0,1] + approx[3,0,1])/4)
-            # print(x)
-            squares_g_centre.append((x,y))
-            # cv2.circle(im, (x,y),radius=5,color=(0,255,0),thickness=-1)
 
+            #Looking if squares are in enemy scoring zone
+            if x  > enemy[0,0] and x < enemy[1,0] and  y > enemy[0,1] and y < enemy[2,1]:
+                squares_g_centre_in.append(np.array([x,y]))
+            else: 
+                squares_g_centre_out.append(np.array([x,y]))
             
     # # Drawing of contours --> can be uncommented for debugging
     # cv2.drawContours(warped, field, -1, (255,68,204), 3)
@@ -177,16 +183,11 @@ def recognition(cap, pts, HSV_blue, HSV_red, HSV_green):
     # cv2.drawContours(warped, squares_g, -1, (0,255,0), 3)        
     # cv2.drawContours(warped, squares_b, -1, (255,0,0), 3)   
     # cv2.imshow('',warped)
-    return warped, squares_b_centre, squares_g_centre, squares_r_centre
+    return warped, squares_b_centre_in, squares_g_centre_in, squares_r_centre_in, squares_b_centre_out, squares_g_centre_out, squares_r_centre_out
 
 def goal_allocation(friendly_aruco, goals, goal_centres):
-    if len(goals) != 2:
-        print("HELP! Geen 2 scoorzones")
-        return
-    #NOTE: we gaan goals echt wel moeten sorteren!
-    
-    elif friendly_aruco[0] > goals[0][0][0] and friendly_aruco[0] < goals[0][1][0]: #kunnen ook nog y waarden specifieren, maar op zich niet nodig
-        friendly = [[goals[0][0]],[goals[0][1]],[goals[0][2]],[goals[0][3]]]
+    if friendly_aruco[0] > goals[0][0][0] and friendly_aruco[0] < goals[0][1][0]: #kunnen ook nog y waarden specifieren, maar op zich niet nodig
+        friendly = goals[0] 
         enemy = goals[1]
         enemy_centre = goal_centres[1]
     else:
