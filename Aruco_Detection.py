@@ -85,31 +85,14 @@ def distanceAruco(our_position, our_heading, their_position):
     
     return distance, angle, rel_angle
 
+def our_position_heading(img):
+    cX, cY, heading, ids, img, _ = findAruco(img)
+    our_position, our_heading, _, _, _ = positioning(cX, cY, heading, ids)
 
-# while True:
-#     _, img = cap.read()
-#     # img = cv2.imread("aruco_transformed.png")  # make sure path is correct and terminal is in right folder
+    return our_position, our_heading
 
-#     # _, _, _, ids, img, corners = findAruco(img)
-#     _, _, _, ids, img, corners = findAruco(contrast_enhancer(img, 2.5, -100))
-#     cv2.imshow('img', img)
-#     if cv2.waitKey(1) == 113:       # Q-key as quit button
-#         break
+def their_position_heading(img):
+    cX, cY, heading, ids, img, _ = findAruco(img)
+    _, _, _, their_position, their_heading = positioning(cX, cY, heading, ids)
 
-
-# img = cv2.imread("aruco_transformed.png")
-# cX, cY, heading, ids, img, corners = findAruco(img, draw=True)
-# # print("corners =", corners)
-# # print("ids =", ids)
-# print(cX)
-# print(cY)
-# print(ids)
-# # print(corners)
-# print(heading * 180 / np.pi)
-
-# our_pos, our_heading, their_ids, their_pos, their_heading = positioning(cX, cY, heading, ids)
-# print(our_pos)
-# print(our_heading[0] * 180 / np.pi)
-# print(their_ids)
-# print(their_pos)
-# print(their_heading)
+    return their_position, their_heading
