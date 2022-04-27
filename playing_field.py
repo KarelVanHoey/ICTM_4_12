@@ -12,8 +12,8 @@ def init(cap, skip_frame=3):
     while warped is None:
         
         
-        # ret, im = cap.read()
-        im = cv2.imread('playing_field_black_pictures/frame5.jpg')
+        ret, im = cap.read()
+        # im = cv2.imread('playing_field_black_pictures/frame5.jpg')
         
         if frame > skip_frame:
             
@@ -35,6 +35,7 @@ def init(cap, skip_frame=3):
 
                     pts = np.array(field)
                     warped = four_point_transform(im, pts) 
+                    
                     break
             frame = 0
         else:
@@ -75,20 +76,25 @@ def init(cap, skip_frame=3):
             
             # print('field:', cv2.contourArea(approx)) #Opmerking: met vaste grootte van veld: binnen opp >185000 en buitenopp niet vindbaar (wel via hoekpunten coord.)
         elif len(approx) == 4 and cv2.contourArea(approx)>12000 and cv2.contourArea(approx) < 15000 and av not in averages:
-            goal.append(approx)
+            # approx_alt = [approx[0,0],approx[1,0],approx[2,0],approx[3,0]]
+            help = []
+            for i in approx:
+                help.append(i[0])
+            help = order_points(help)
+            goal.append(help)
+            
             averages.extend(range(av-5, av+5))
             # print('goal:',cv2.contourArea(approx)) #Opmerking: met vaste grootte van veld: binnen opp >8000 en buitenopp >12000
             x = int((approx[0,0,0] + approx[1,0,0] + approx[2,0,0] + approx[3,0,0])/4)
             y = int((approx[0,0,1] + approx[1,0,1] + approx[2,0,1] + approx[3,0,1])/4)
             goal_centre.append(np.array([x,y]))
-
     return warped, pts, goal, goal_centre, field
 
 
 def recognition(cap, pts):
     # Image processing
-    # _, im = cap.read()
-    im = cv2.imread('playing_field_black_pictures/frame5.jpg')
+    _, im = cap.read()
+    # im = cv2.imread('playing_field_black_pictures/frame5.jpg')
     warped = four_point_transform(im, pts)
 
     # Colour ranges:
@@ -194,11 +200,12 @@ def recognition(cap, pts):
 
 def goal_allocation(friendly_aruco, goals, goal_centres):
     if len(goals) != 2:
-        print("HELP! Meer dan 2 scoorzones")
+        print("HELP! Geen 2 scoorzones")
         return
     #NOTE: we gaan goals echt wel moeten sorteren!
-    elif friendly_aruco[0] > goals[0][0][0][0] and friendly_aruco[0] < goals[0][1][0][0]: #kunnen ook nog y waarden specifieren, maar op zich niet nodig
-        friendly = goals[0]
+    
+    elif friendly_aruco[0] > goals[0][0][0] and friendly_aruco[0] < goals[0][1][0]: #kunnen ook nog y waarden specifieren, maar op zich niet nodig
+        friendly = [[goals[0][0]],[goals[0][1]],[goals[0][2]],[goals[0][3]]]
         enemy = goals[1]
         enemy_centre = goal_centres[1]
     else:

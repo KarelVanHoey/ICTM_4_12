@@ -32,9 +32,15 @@ def blue_dist(aruco, blue_centre, goal_centre,weight):
 
 
 def next_target(aruco, goal_centre,green_centre, red_centre, blue_centre, weights=[1,2,3]):
-    green = green_dist(aruco, green_centre, goal_centre,weights[0])
-    red = red_dist(aruco, red_centre, goal_centre,weights[1])
-    blue = blue_dist(aruco, blue_centre, goal_centre,weights[2])
+    green = [goal_centre,10**6]
+    red = [goal_centre,10**7]
+    blue = [goal_centre,10**8]
+    if green_centre != []:
+        green = green_dist(aruco, green_centre, goal_centre,weights[0])
+    if red_centre != []:
+        red = red_dist(aruco, red_centre, goal_centre,weights[1])
+    if blue_centre != []:
+        blue = blue_dist(aruco, blue_centre, goal_centre,weights[2])
 
     min = np.argmin(np.array([green[1],red[1],blue[1]]))
     all = [green[0], red[0], blue[0]]
