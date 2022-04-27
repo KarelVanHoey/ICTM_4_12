@@ -4,7 +4,7 @@ from cv2 import imshow
 import numpy as np
 from transform import four_point_transform
 from playing_field import init, recognition, goal_allocation
-from distance import next_target
+from distance import blue_dist, next_target
 
 
 # Obtain image from video stream
@@ -53,5 +53,6 @@ while True:
     if cv2.waitKey(1) == 27:
         break
 print(1/(np.average(t)/10**(9)))
+print(blue, red)
 # print(len(goal))
 # print(len(blue))
