@@ -6,8 +6,8 @@ from transform import four_point_transform
 
 
 # Obtain image from video stream
-# IP_adress = '192.168.1.15'
-# cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
+IP_adress = '192.168.1.15'
+cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
 
 #Define colour range:(from Finding_HVS.py)
 lower_blue = np.array([22, 116, 61]) 
@@ -27,8 +27,8 @@ skip_frame = 3 #how many frames we want to skip
 warped = None
 
 while True:
-    # ret, im = cap.read()
-    im = cv2.imread('playing_field_black_pictures/frame3.jpg')
+    ret, im = cap.read()
+    # im = cv2.imread('playing_field_black_pictures/frame3.jpg')
 
     if frame > skip_frame:
         
@@ -156,7 +156,7 @@ while True:
 
                     
             # Drawing of contours
-            cv2.drawContours(warped, field, -1, (255,68,204), 3)
+            # cv2.drawContours(warped, field, -1, (255,68,204), 3)
             cv2.drawContours(warped, goal, -1, (50,90,80), 3)
             cv2.drawContours(warped, squares_r, -1, (0,0,255), 3)        
             cv2.drawContours(warped, squares_g, -1, (0,255,0), 3)        
