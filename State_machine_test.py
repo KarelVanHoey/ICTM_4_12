@@ -1,4 +1,3 @@
-from cv2 import waitKey
 import smach
 
 # class MachineState(StateMachine):
@@ -9,54 +8,53 @@ import smach
 #     Drop_Block = State('pick block')
 
 class GO_BLOCK(smach.State):
-    def __init__(self, outcomes=['error1', 'outcome1']):
-        x=1
-        return None
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['error1', 'outcome1'])
     def execute(self, userdata):
-        # Your state execution goes here
-        if xxxx:
-            return 'error1'
-        else:
+        x=1
+        while dist >= 150:
+            # Your state execution goes here
             return 'outcome1'
+        return 'error1'
 
 class CLAIM(smach.State):
-    def __init__(self, outcomes=['error2', 'outcome2']):
-        x=2
-        return None
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['error2', 'outcome2'])
     def execute(self, userdata):
-        # Your state execution goes here
-        if xxxx:
-            return 'error2'
-        else:
+        x=2
+        while dist >= 150:
+            # Your state execution goes here
             return 'outcome2'
+        return 'error2'
+            
 
 class GO_ZONE(smach.State):
-    def __init__(self, outcomes=['error3', 'outcome3']):
-        x=3
-        return None
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['error3', 'outcome3'])
     def execute(self, userdata):
-        # Your state execution goes here
-        if xxxx:
-            return 'error3'
-        else:
+        x=3
+        while dist >= 150:
+            # Your state execution goes here
             return 'outcome3'
+        return 'error3'
+            
 
 class DROP(smach.State):
-    def __init__(self, outcomes=['error4', 'outcome4']):
-        x=4
-        return None
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['error4', 'outcome4'])
     def execute(self, userdata):
-        # Your state execution goes here
-        if x==4:
-            return 'error4'
-        else:
+        x=4
+        while dist >= 150:
+            # Your state execution goes here
             return 'outcome4'
+        return 'error4'
 
 class COLLISION(smach.State):
-    def __init__(self, outcomes=['out1', 'out2','out3', 'out4']):
-        return None
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['out1', 'out2','out3', 'out4'])
     def execute(self, userdata):
-        # Your state execution goes here
+        while dist < 150:
+            # Your state execution goes here
         if x==1:
             return 'out1'
         elif x==2:
