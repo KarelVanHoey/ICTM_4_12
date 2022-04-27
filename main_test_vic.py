@@ -4,7 +4,7 @@ from cv2 import imshow
 import numpy as np
 from transform import four_point_transform, order_points
 from playing_field import init, recognition, goal_allocation
-from distance import next_target
+from distance import blue_dist, next_target
 
 
 # Obtain image from video stream
