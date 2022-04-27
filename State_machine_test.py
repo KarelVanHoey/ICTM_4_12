@@ -3,6 +3,7 @@ import smach
 #Initiation
 #   Transformation
 #   playing field recognition
+#   color adjustment blocks
 #   direction enemy check (Aruco_detection_testing.py) -> make Get_enemy_info.py from latest function
 
 #previous state ===> global x
