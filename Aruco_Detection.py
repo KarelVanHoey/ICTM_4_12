@@ -5,7 +5,8 @@ from contrast import contrast_enhancer
 
 # IP_adress = '192.168.1.15'
 # cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
-# # _, img = cap.read()
+# _, img = cap.read()
+img = cv2.imread("aruco_transformed_2.png")
 
 def findAruco(img, draw=False):
     # Aruco set-up
@@ -96,3 +97,36 @@ def their_position_heading(img):
     _, _, _, their_position, their_heading = positioning(cX, cY, heading, ids)
 
     return their_position, their_heading
+
+def enemyOrientation(img):
+    clone = img.copy()                                                          #used to redraw arrows in enemyOrientation(img)
+    their_position, their_heading = their_position_heading(img)
+    x = 0
+    while True:
+        R = [100*np.cos(their_heading[0]), -100*np.sin(their_heading[0])]       #rotation amount
+        A = [round(num) for num in their_position[0]]                           #start position arrow
+        B = [0, 0]                                                              #end position arrow calculation
+        for i in range(2):
+            B[i] = A[i] + round(R[i])   	                                    #round result
+        
+        #draw and write on image
+        cv2.imshow('img', img)
+        cv2.putText(img, 'rotated by ' + str(x) + ' degrees', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 3) 
+        cv2.arrowedLine(img, tuple(A), tuple(B), (255, 255, 255), 3) 
+        #Locations have to be of type int!
+
+        #wait on keys
+        Key = cv2.waitKey(1)
+        if Key == 114:         # r-key
+            their_heading[0] += np.pi/4
+            x += 45
+            x = np.mod(x,360)
+            img = clone.copy()
+        elif Key == 82:        # Capital R
+            their_heading[0] += np.pi/180
+            x += 1 
+            x = np.mod(x,360)
+            img = clone.copy()
+        elif Key == 113:       # q-key as quit button
+            break
+    return x        # returns # of degrees rotated counter clockwise
