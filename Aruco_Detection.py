@@ -129,4 +129,5 @@ def enemyOrientation(img):
             img = clone.copy()
         elif Key == 113:       # q-key as quit button
             break
-    return x        # returns # of degrees rotated counter clockwise
+    # x *= np.pi/180           # uncheck if wanted in radians
+    return x                   # returns # of degrees rotated counter clockwise
