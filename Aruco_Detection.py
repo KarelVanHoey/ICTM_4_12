@@ -98,7 +98,7 @@ def their_position_heading(img):
 
     return their_position, their_heading
 
-def enemyOrientation(img):
+def enemyOrientation(img):                                                      #tested with aruco_transformed_2.png
     clone = img.copy()                                                          #used to redraw arrows in enemyOrientation(img)
     their_position, their_heading = their_position_heading(img)
     x = 0
