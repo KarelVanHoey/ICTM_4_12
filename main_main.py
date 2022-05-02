@@ -3,12 +3,13 @@ import cv2
 import time
 from functions_vic import *
 from functions_karel import *
+from Aruco_Detection import *
 
 # NOT NEEDED ANYMORE: access image through grab_image()
 # # Obtain image from video stream
-# IP_adress = '192.168.1.15'
-# cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
-# cap = None
+# # IP_adress = '192.168.1.15'
+# # cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
+# # cap = None
 
 # Start camera thread that enables image requests through grab_image()
 camera_thread =  CameraFootage()
@@ -27,10 +28,12 @@ HSV_green = np.array([[28, 67, 94], [128, 255, 255]])
 warped, pts, goal, goal_centre, field = init(grab_image())
 
 # Finding of Aruco markers --> Karel
-aruco_friend = [90,200]
+aruco_friend = []
+while aruco_friend == []:
+    aruco_friend, _ = our_position_heading(grab_image())
 
 # Deciding of enemy or friendly goal
-friendly_goal,  enemy_goal, enemy_goal_centre = goal_allocation(aruco_friend,goal,goal_centre)
+friendly_goal, enemy_goal, enemy_goal_centre = goal_allocation(aruco_friend, goal, goal_centre)
 
 # Rest of recognition
 while True:
