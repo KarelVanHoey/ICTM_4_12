@@ -6,7 +6,7 @@ from contrast import contrast_enhancer
 # IP_adress = '192.168.1.15'
 # cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
 # _, img = cap.read()
-img = cv2.imread("aruco_transformed_2.png")
+img = cv2.imread("playing_field5.png")
 
 def findAruco(img, draw=False):
     # Aruco set-up
@@ -127,7 +127,19 @@ def enemyOrientation(img):                                                      
             x += 1 
             x = np.mod(x,360)
             img = clone.copy()
+        elif Key == 116:        # t-key
+            their_heading[0] -= np.pi/4
+            x -= 45
+            x = np.mod(x,360)
+            img = clone.copy()
+        elif Key == 84:        # capital T
+            their_heading[0] -= np.pi/180
+            x -= 1 
+            x = np.mod(x,360)
+            img = clone.copy()
         elif Key == 113:       # q-key as quit button
             break
     # x *= np.pi/180           # uncheck if wanted in radians
     return x                   # returns # of degrees rotated counter clockwise
+
+print(enemyOrientation(img))
