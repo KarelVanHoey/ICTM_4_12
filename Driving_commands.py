@@ -47,12 +47,10 @@ class RRT_Drive:
                     th.append(-90)
             else:
                 th.append(round(np.arctan((self.Y[i+1]-self.Y[i])/(self.X[i+1]-self.X[i]))*180/np.pi,1))
-        print("HIER A")
     
         print(our_position_heading(img)[1])
-        print("Hier B")
         comm = [our_position_heading(img)[1]]
-        print(comm)
+        print("comm: ", comm)
         #comm = ["starting angle"]
         for i in range(1,len(th)):
             comm.append(round(th[i]-th[i-1],1))

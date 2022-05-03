@@ -14,8 +14,12 @@ def main():
     start=(50,50)
     obsdim=30
     obstacle_coords = []
-    cap = cv2.VideoCapture('http://192.168.1.15:8000/stream.mjpg')
-    _, img = cap.read()
+    #cap = cv2.VideoCapture('http://192.168.1.15:8000/stream.mjpg')
+    #_, img = cap.read()
+    img = cv2.imread('test_image_robin.jpg')
+    #img = cv2.imread('playing_field_black_pictures/frame5.jpg')
+    cv2.imshow('image', img)
+    cap = None 
 
     warped, pts, goal, goal_centre, field = init(cap)
     #print("hiero: ", goal,"centers:", goal_centre)
@@ -78,7 +82,6 @@ def main():
     print("Xs: ", Xs)
     print("Ys: ", Ys)
     instructions = RRT_Drive(Xs,Ys)
-    print("c'est qui à l'appareil")
     print("angles: ", instructions.get_angle(img))
     print("distances: ", instructions.get_distance())
     print("\n")
@@ -92,3 +95,4 @@ def main():
 
 
 main()
+pygame.event.wait(0)
