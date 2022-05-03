@@ -1,23 +1,19 @@
 import cv2
 import cv2.aruco as aruco
 import numpy as np
-from contrast import contrast_enhancer
+from functions_karel import contrast_enhancer
 
 # IP_adress = '192.168.1.15'
 # cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
 # _, img = cap.read()
-img = cv2.imread("playing_field5.png")
+# img = cv2.imread("aruco_transformed_2.png")
 
 def findAruco(img, draw=False):
-    # Aruco set-up
-    # marker_size = 5 
-    # total_markers = 50
-    # key = getattr(aruco, 'DICT_5X5_50')        # f'DICT_{marker_size}X{marker_size}_{total_markers}')
     arucoDict = aruco.Dictionary_get(getattr(aruco, 'DICT_5X5_50'))
     arucoParam = aruco.DetectorParameters_create()
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    corners, ids, rejected = aruco.detectMarkers(gray, arucoDict, parameters=arucoParam)
+    corners, ids, _ = aruco.detectMarkers(gray, arucoDict, parameters=arucoParam)
     
     if ids is None:
         ids = np.array([])
