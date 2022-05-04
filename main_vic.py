@@ -48,6 +48,5 @@ while True:
     cv2.imshow('',warped)
 
     #Exit if requested: esc
-    
     if cv2.waitKey(1) == 27:
         break
