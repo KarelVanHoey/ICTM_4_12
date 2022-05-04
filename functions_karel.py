@@ -8,6 +8,9 @@ from Aruco_Detection import *
 # Class that captures most recent image and stores it in a global variable (img)
 
 global_img = None
+M = None
+maxHeight = 0
+maxWidth = 0
 global_distance = []
 camera_lock = threading.Lock()
 distance_lock = threading.Lock()
