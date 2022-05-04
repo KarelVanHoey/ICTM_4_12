@@ -59,9 +59,10 @@ while True:
     cv2.drawContours(warped, field, -1, (255,68,204), 3)
     cv2.drawContours(warped, [np.array(friendly_goal,dtype="int32")], -1, (50,90,80), 3) #Note: deze structuur is nodig om normale array te kunnen gebruiken
     cv2.circle(warped, target,radius=5,color=(255,255,255),thickness=-1) 
-    # cv2.circle(warped, aruco_friend, radius=5,color=(0,0,0),thickness=-1)   
+    cv2.circle(warped, np.array(aruco_friend,dtype="int32"), radius=5,color=(255,0,127),thickness=-1)   
     cv2.imshow('',warped)
-
+    # print(target)
+    # print(aruco_friend)
     #Exit if requested: esc
     
     if cv2.waitKey(1) == 27:
