@@ -136,6 +136,4 @@ def enemyOrientation(img):                                                      
         elif Key == 113:       # q-key as quit button
             break
     # x *= np.pi/180           # uncheck if wanted in radians
-    return x                   # returns # of degrees rotated counter clockwise
-
-print(enemyOrientation(img))
+    return x                   # returns # of degrees rotated counterclockwise (in the positive direction)
