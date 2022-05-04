@@ -2,12 +2,15 @@ import threading
 import cv2
 import copy
 import numpy as np
+from Aruco_Detection import *
 
 
 # Class that captures most recent image and stores it in a global variable (img)
 
 global_img = None
+global_distance = None
 camera_lock = threading.Lock()
+distance_lock = threading.Lock()
 
 class CameraFootage(threading.Thread):
 
@@ -18,7 +21,6 @@ class CameraFootage(threading.Thread):
         # self.cap = cv2.VideoCapture(0)        # Used for testing: webcam
     
     def run(self):
-        global exitFlag
         global global_img
         while True:
             _, local_img = self.cap.read()
@@ -38,9 +40,11 @@ def grab_image():
     camera_lock.acquire()
     if global_img is not None:
         loc_img = copy.deepcopy(global_img)
+    else:
+        loc_img = None
     camera_lock.release()
 
-    return loc_img if loc_img is not None else None 
+    return loc_img
 
 
 # Creates stack from list of distances and angles
@@ -59,3 +63,15 @@ def contrast_enhancer(img_object, alpha, beta):
     new_image = cv2.addWeighted(img_object, alpha, np.zeros(img_object.shape, img_object.dtype), 0, beta)
 
     return new_image
+
+class DistanceArucoEnemy(threading.Thread):
+
+    def __init__(self):
+        threading.Thread.__init__(self)
+    
+    def run(self):
+        global glob_distance
+        local_img = grab_image()
+        loc_distance, angle, rel_angle = distanceAruco(local_img)
+        distance_lock.acquire()
+
