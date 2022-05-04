@@ -39,7 +39,7 @@ M, goal, goal_centre, field = init(maxWidth, maxHeight)
 # Finding of Aruco markers --> Karel
 aruco_friend = []
 while aruco_friend == []:
-    aruco_friend, _ = our_position_heading(four_point_transform(grab_image(), pts))
+    aruco_friend, _ = our_position_heading(grab_image_warped())
 
 # Deciding of enemy or friendly goal
 friendly_goal, enemy_goal, enemy_goal_centre = goal_allocation(aruco_friend, goal, goal_centre)
