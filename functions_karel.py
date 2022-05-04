@@ -47,6 +47,24 @@ def grab_image():
     return loc_img
 
 
+def grab_image_warped():
+    global global_img
+    global M
+    global maxHeight
+    global maxWidth
+    
+    camera_lock.acquire()
+    if global_img is not None:
+        loc_img = copy.deepcopy(global_img)
+    else:
+        loc_img = None
+    camera_lock.release()
+
+    if loc_img is not None:
+        loc_img = cv2.warpPerspective(loc_img, M, (maxWidth, maxHeight))
+
+    return loc_img
+
 # Creates stack from list of distances and angles
 
 def create_stack(list_angles, list_distances):
@@ -58,11 +76,11 @@ def create_stack(list_angles, list_distances):
     return stack
 
 
-def contrast_enhancer(img_object, alpha, beta):
-    # img = cv2.imread(file_name)
-    new_image = cv2.addWeighted(img_object, alpha, np.zeros(img_object.shape, img_object.dtype), 0, beta)
+# def contrast_enhancer(img_object, alpha, beta):
+#     # img = cv2.imread(file_name)
+#     new_image = cv2.addWeighted(img_object, alpha, np.zeros(img_object.shape, img_object.dtype), 0, beta)
 
-    return new_image
+#     return new_image
 
 class DistanceArucoEnemy(threading.Thread):
 
