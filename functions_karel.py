@@ -8,9 +8,6 @@ from Aruco_Detection import *
 # Class that captures most recent image and stores it in a global variable (img)
 
 global_img = None
-M = None
-maxHeight = 0
-maxWidth = 0
 global_distance = []
 camera_lock = threading.Lock()
 distance_lock = threading.Lock()
@@ -50,11 +47,8 @@ def grab_image():
     return loc_img
 
 
-def grab_image_warped():
+def grab_image_warped(M, maxWidth, maxHeight):
     global global_img
-    global M
-    global maxHeight
-    global maxWidth
     
     camera_lock.acquire()
     if global_img is not None:
