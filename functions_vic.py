@@ -8,7 +8,6 @@ def init(maxWidth, maxHeight, skip_frame=3):
     transformation matrix is contructed and the image is transformed. From the transformed field the scoring zones are found.
     Returns the transformation matrix, the goals, the goal centre points and the field.
     """
-    #Note: maybe better to not return warped image and give transformation matrix instead of transformation points.
 
     pts = None
     frame = 0
@@ -27,7 +26,6 @@ def init(maxWidth, maxHeight, skip_frame=3):
             edges = cv2.Canny(imgray,20,200) #Note: eerste was origineel 100
             contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             
-            # imshow('',edges)
             for i in contours:
                 epsilon = .1*cv2.arcLength(i,True)
                 approx = cv2.approxPolyDP(i,epsilon,True)
@@ -45,20 +43,16 @@ def init(maxWidth, maxHeight, skip_frame=3):
         else:
             frame += 1
         if cv2.waitKey(1) == 27:
-            # print(warped)
             exit(0)
 
     # Goals and field
     goal = []
     goal_centre = []
     averages = []
-    
-    #
 
+    # Use while loop to remove duplicates that might have been detected.
     while len(goal) < 2:
         field = []
-
-         # --> to not get duplicates in goals
         im = grab_image()
         warped = cv2.warpPerspective(im, M,(maxWidth, maxHeight)) 
         imgray = cv2.cvtColor(warped,cv2.COLOR_BGR2GRAY)
@@ -292,7 +286,9 @@ def next_target(aruco, goal_centre, enemy_aruco, green_centre, red_centre, blue_
     green = [[281,192],10**6]
     red = [[281,192],10**7]
     blue = [[281,192],10**8]
-
+    if aruco == []:
+        return [281,192]
+        
     #Kijken of vijand blokje niet vastheeft. Straal nu gekozen op r = 50
     for i in green_centre:
         if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
