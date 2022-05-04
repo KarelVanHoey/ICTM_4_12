@@ -8,7 +8,7 @@ from Aruco_Detection import *
 # Class that captures most recent image and stores it in a global variable (img)
 
 global_img = None
-global_distance = None
+global_distance = []
 camera_lock = threading.Lock()
 distance_lock = threading.Lock()
 
@@ -70,8 +70,9 @@ class DistanceArucoEnemy(threading.Thread):
         threading.Thread.__init__(self)
     
     def run(self):
-        global glob_distance
+        global global_distance
         local_img = grab_image()
         loc_distance, angle, rel_angle = distanceAruco(local_img)
         distance_lock.acquire()
-
+        global_distance = copy.deepcopy(loc_distance)
+        distance_lock.release()

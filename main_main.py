@@ -14,6 +14,8 @@ from Aruco_Detection import *
 # Start camera thread that enables image requests through grab_image()
 camera_thread = CameraFootage()
 camera_thread.start()
+distance_thread = DistanceArucoEnemy()
+distance_thread.start()
 
 # Beginning of time
 t = time.process_time()
