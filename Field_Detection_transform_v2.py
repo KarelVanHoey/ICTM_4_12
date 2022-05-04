@@ -44,7 +44,7 @@ while True:
         for i in contours:
             epsilon = .1*cv2.arcLength(i,True)
             approx = cv2.approxPolyDP(i,epsilon,True)
-
+            # print('help')
             #Finding of playing field
             if len(approx) == 4 and cv2.contourArea(approx)>190000:
                 for i in approx:
