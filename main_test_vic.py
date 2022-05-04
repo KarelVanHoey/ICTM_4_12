@@ -43,6 +43,13 @@ while True:
     cv2.drawContours(warped, [np.array(friendly_goal,dtype="int32")], -1, (50,90,80), 3) #Note: deze structuur is nodig om normale array te kunnen gebruiken
     cv2.circle(warped, target,radius=5,color=(255,0,0),thickness=-1) 
     cv2.circle(warped, aruco_friend,radius=5,color=(0,0,0),thickness=-1)   
+    for j in blue:
+        cv2.circle(warped, j,radius=5,color=(255,0,0),thickness=-1)   
+    for j in red:
+        cv2.circle(warped, j,radius=5,color=(0,255,0),thickness=-1)   
+    for j in green:
+        cv2.circle(warped, j,radius=5,color=(0,0,255),thickness=-1)   
+       
     cv2.imshow('',warped)
 
     if toc- tic != 0:
