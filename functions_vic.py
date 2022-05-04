@@ -3,6 +3,13 @@ import cv2
 from functions_karel import grab_image
 
 def init(skip_frame=3):
+    """
+    Initialises the playing field. Keeps running until a playing field has been found. With the coord. of this field, a
+    transformation matrix is contructed and the image is transformed. From the transformed field the scoring zones are found.
+    Returns the warped image, the transformation points, the goals, the goal centre points and the field.
+    """
+    #Note: maybe better to not return warped image and give transformation matrix instead of transformation points.
+
     pts = None
     frame = 0
 
@@ -227,7 +234,6 @@ def order_points(pts):
 	return rect
 
 def four_point_transform(image, pts):
-    
 	# obtain a consistent order of the points and unpack them
 	# individually
 	rect = order_points(pts)
@@ -238,6 +244,7 @@ def four_point_transform(image, pts):
 		[maxWidth - 1, 0],
 		[maxWidth - 1, maxHeight - 1],
 		[0, maxHeight - 1]], dtype = "float32")
+
 	# compute the perspective transform matrix and then apply it
 	M = cv2.getPerspectiveTransform(rect, dst)
 	warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
