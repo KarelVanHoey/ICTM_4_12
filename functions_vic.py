@@ -50,7 +50,6 @@ def init(skip_frame=3):
         field = []
 
          # --> to not get duplicates in goals
-        # _, im = cap.read()
         im = grab_image()
         warped = four_point_transform(im, pts) 
         imgray = cv2.cvtColor(warped,cv2.COLOR_BGR2GRAY)
@@ -81,9 +80,9 @@ def init(skip_frame=3):
     return warped, pts, goal, goal_centre, field
 
 
-def recognition(cap, pts, enemy, HSV_blue, HSV_red, HSV_green):
+def recognition(pts, enemy, HSV_blue, HSV_red, HSV_green):
     # Image processing
-    _, im = cap.read()
+    im = grab_image()
     # im = cv2.imread('playing_field_black_pictures/frame5.jpg')
     warped = four_point_transform(im, pts)
 
@@ -221,21 +220,21 @@ def four_point_transform(image, pts):
 	# obtain a consistent order of the points and unpack them
 	# individually
 	rect = order_points(pts)
-	(tl, tr, br, bl) = rect
+	# (tl, tr, br, bl) = rect
 	# compute the width of the new image, which will be the
 	# maximum distance between bottom-right and bottom-left
 	# x-coordiates or the top-right and top-left x-coordinates
-	widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
-	widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
-	maxWidth = max(int(widthA), int(widthB))
+            # widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
+            # widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
+            # maxWidth = max(int(widthA), int(widthB))
 	maxWidth = 562
 	# print(maxWidth)
 	# compute the height of the new image, which will be the
 	# maximum distance between the top-right and bottom-right
 	# y-coordinates or the top-left and bottom-left y-coordinates
-	heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
-	heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
-	maxHeight = max(int(heightA), int(heightB))
+            # heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
+            # heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
+            # maxHeight = max(int(heightA), int(heightB))
 	maxHeight = 385									#Better to have fixed frame size? -->@Robin
 	# print(maxHeight)
 	# now that we have the dimensions of the new image, construct

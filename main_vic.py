@@ -37,7 +37,7 @@ while True:
 
     # Giving of warped image, finding of vertices of goals, inner field and giving of coordinates
 
-    warped, blue_in, green_in, red_in, blue_out, green_out, red_out = recognition(cap, pts, enemy_goal, HSV_blue,HSV_red,HSV_green)
+    warped, blue_in, green_in, red_in, blue_out, green_out, red_out = recognition(pts, enemy_goal, HSV_blue,HSV_red,HSV_green)
 
     target = next_target(aruco_friend, enemy_goal_centre,[0,0],green_out,red_out,blue_out)
     toc = time.process_time_ns()
