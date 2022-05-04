@@ -6,7 +6,7 @@ from functions_karel import contrast_enhancer
 # IP_adress = '192.168.1.15'
 # cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
 # _, img = cap.read()
-# img = cv2.imread("aruco_transformed_2.png")
+img = cv2.imread("aruco_transformed_2.png")
 
 def findAruco(img, draw=False):
     arucoDict = aruco.Dictionary_get(getattr(aruco, 'DICT_5X5_50'))
