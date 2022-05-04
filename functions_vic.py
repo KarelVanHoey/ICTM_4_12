@@ -2,11 +2,11 @@ import numpy as np
 import cv2
 from functions_karel import grab_image
 
-def init(skip_frame=3):
+def init(maxWidth, maxHeight, skip_frame=3):
     """
     Initialises the playing field. Keeps running until a playing field has been found. With the coord. of this field, a
     transformation matrix is contructed and the image is transformed. From the transformed field the scoring zones are found.
-    Returns the warped image, the transformation points, the goals, the goal centre points and the field.
+    Returns the transformation matrix, the goals, the goal centre points and the field.
     """
     #Note: maybe better to not return warped image and give transformation matrix instead of transformation points.
 
@@ -38,7 +38,7 @@ def init(skip_frame=3):
                         field.append(i[0])
 
                     pts = np.array(field)
-                    # warped = four_point_transform(im, pts) 
+                    M = four_point_transform(im, pts) 
                     
                     break
             frame = 0
@@ -53,12 +53,14 @@ def init(skip_frame=3):
     goal_centre = []
     averages = []
     
+    #
+
     while len(goal) < 2:
         field = []
 
          # --> to not get duplicates in goals
         im = grab_image()
-        warped = four_point_transform(im, pts) 
+        warped = cv2.warpPerspective(im, M,(maxWidth, maxHeight)) 
         imgray = cv2.cvtColor(warped,cv2.COLOR_BGR2GRAY)
         edges = cv2.Canny(imgray,20,100) #Note: met grijze goal was 2e 200
         contours, _ = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -84,10 +86,10 @@ def init(skip_frame=3):
                 x = int((approx[0,0,0] + approx[1,0,0] + approx[2,0,0] + approx[3,0,0])/4)
                 y = int((approx[0,0,1] + approx[1,0,1] + approx[2,0,1] + approx[3,0,1])/4)
                 goal_centre.append(np.array([x,y]))
-    return warped, pts, goal, goal_centre, field
+    return M, goal, goal_centre, field
 
 
-def recognition(pts, enemy, HSV_blue, HSV_red, HSV_green):
+def recognition(M, maxWidth, maxHeight, enemy, HSV_blue, HSV_red, HSV_green):
     """
     Receives transformation points, enemy goal and HSV values of block colours. 
     Returns the transformed image and the location of the blocks that are in the enemy goal and of the blocks that are outside the enemy goal seperately.
@@ -99,7 +101,7 @@ def recognition(pts, enemy, HSV_blue, HSV_red, HSV_green):
     # Image processing
     im = grab_image()
     # im = cv2.imread('playing_field_black_pictures/frame5.jpg')
-    warped = four_point_transform(im, pts)
+    warped = cv2.warpPerspective(im, M,(maxWidth,maxHeight))
 
 
     
@@ -247,9 +249,9 @@ def four_point_transform(image, pts):
 
 	# compute the perspective transform matrix and then apply it
 	M = cv2.getPerspectiveTransform(rect, dst)
-	warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
+	# warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
 	# return the warped image
-	return warped
+	return M
 
 def green_dist(aruco, green_centre, goal_centre,weight):
     #Find distance from friendly aruco to green blocks to scoring zone
