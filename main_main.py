@@ -12,7 +12,7 @@ from Aruco_Detection import *
 # # cap = None
 
 # Start camera thread that enables image requests through grab_image()
-camera_thread =  CameraFootage()
+camera_thread = CameraFootage()
 camera_thread.start()
 
 # Beginning of time

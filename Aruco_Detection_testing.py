@@ -1,7 +1,6 @@
 import cv2
 import cv2.aruco as aruco
 import numpy as np
-from contrast import contrast_enhancer
 import time
 
 IP_adress = '192.168.1.15'
@@ -74,7 +73,7 @@ while True:
 
     # _, _, _, ids, img, corners = findAruco(img)
     tic = time.process_time_ns()
-    _, _, _, ids, img, corners = findAruco(contrast_enhancer(img, 1, 0))
+    _, _, _, ids, img, corners = findAruco(img)
     toc = time.process_time_ns()
     print(tic-toc)
     cv2.imshow('img', img)
