@@ -6,8 +6,9 @@ from pybricks.tools import wait, StopWatch, DataLog
 from pybricks.robotics import DriveBase
 from pybricks.media.ev3dev import SoundFile, ImageFile
 import cv2
+from Aruco_Detection import our_position_heading
 
-from Aruco_Detection import positioning, findAruco
+from Aruco_Detection import positioning, findAruco, our_position_heading
 #import Aruco_Detection
 
 #GOALS/STRATEGY:
@@ -18,7 +19,6 @@ from Aruco_Detection import positioning, findAruco
 #From consecutive nodes: turn relative angle into turning command
 #Then, calculate distance and use move command
 #Remark possibly need to adjust ange according to aruco after reaching every consecutive node?
-
 
 ev3 = EV3Brick()
 LM = Motor(Port.A, Direction.CLOCKWISE) #left motor
@@ -36,7 +36,8 @@ class RRT_Drive:
         self.number_of_nodes = len(X)
         print("initialized with: ", self.number_of_nodes)
 
-    def get_angle(self):
+    def get_angle(self, img):
+        cv2.imshow('img', img)
         th = []
         for i in range(0,self.number_of_nodes-1):
             if self.X[i+1]-self.X[i] == 0:
@@ -46,8 +47,12 @@ class RRT_Drive:
                     th.append(-90)
             else:
                 th.append(round(np.arctan((self.Y[i+1]-self.Y[i])/(self.X[i+1]-self.X[i]))*180/np.pi,1))
-        cX, cY, heading, ids, img, corners = findAruco(cv2.imread('playing_field_black_pictures/frame5.jpg'))
-        comm = [positioning(cX,cY,heading,ids)[1]]
+        print("HIER A")
+    
+        print(our_position_heading(img)[1])
+        print("Hier B")
+        comm = [our_position_heading(img)[1]]
+        print(comm)
         #comm = ["starting angle"]
         for i in range(1,len(th)):
             comm.append(round(th[i]-th[i-1],1))

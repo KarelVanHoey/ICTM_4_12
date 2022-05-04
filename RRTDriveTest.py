@@ -1,3 +1,4 @@
+from ipaddress import ip_address
 import pygame
 from RRT_Game import RRTGraph
 from RRT_Game import RRTMap
@@ -6,21 +7,25 @@ import time
 from playing_field import init, recognition
 import cv2
 
+
+
 def main():
     dimensions =(512,512)
     start=(50,50)
     obsdim=30
     obstacle_coords = []
-    cap = None
+    cap = cv2.VideoCapture('http://192.168.1.15:8000/stream.mjpg')
+    _, img = cap.read()
+
     warped, pts, goal, goal_centre, field = init(cap)
-    print("hiero: ", goal,"centers:", goal_centre)
+    #print("hiero: ", goal,"centers:", goal_centre)
     goal=(300,300)
     _, blue, green, red = recognition(cap,pts)
-    print("brg: ", [blue,green,red])
+    #print("brg: ", [blue,green,red])
     for e in [blue,green,red]:
         for i in range(len(e)):
             obstacle_coords.append(list(e[i]))
-    print("obs_coords", obstacle_coords)
+    #print("obs_coords", obstacle_coords)
     iteration=0
     t1=0
 
@@ -73,7 +78,8 @@ def main():
     print("Xs: ", Xs)
     print("Ys: ", Ys)
     instructions = RRT_Drive(Xs,Ys)
-    print("angles: ", instructions.get_angle())
+    print("c'est qui à l'appareil")
+    print("angles: ", instructions.get_angle(img))
     print("distances: ", instructions.get_distance())
     print("\n")
 
@@ -85,12 +91,4 @@ def main():
 
 
 
-if __name__ == '__main__':
-    result=False
-    while not result:
-        try:
-            main()
-            result=True
-        except:
-            result=False
-
+main()
