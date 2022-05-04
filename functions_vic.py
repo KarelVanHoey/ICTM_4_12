@@ -81,6 +81,14 @@ def init(skip_frame=3):
 
 
 def recognition(pts, enemy, HSV_blue, HSV_red, HSV_green):
+    """
+    Receives transformation points, enemy goal and HSV values of block colours. 
+    Returns the transformed image and the location of the blocks that are in the enemy goal and of the blocks that are outside the enemy goal seperately.
+    
+    """
+
+    ###
+
     # Image processing
     im = grab_image()
     # im = cv2.imread('playing_field_black_pictures/frame5.jpg')
@@ -97,9 +105,6 @@ def recognition(pts, enemy, HSV_blue, HSV_red, HSV_green):
     mask_g = cv2.inRange(hsv, HSV_green[0], HSV_green[1])
 
     ## Loop to find contour of squares
-    squares_r = []
-    squares_b = []
-    squares_g = []
 
     squares_r_centre_in = []
     squares_b_centre_in = []
@@ -186,6 +191,11 @@ def recognition(pts, enemy, HSV_blue, HSV_red, HSV_green):
     return warped, squares_b_centre_in, squares_g_centre_in, squares_r_centre_in, squares_b_centre_out, squares_g_centre_out, squares_r_centre_out
 
 def goal_allocation(friendly_aruco, goals, goal_centres):
+    """
+    Looks at position of friendly aruco to see in which scoring zone it is and allocates this zone as our zone.
+    Receives the friendly aruco position, both goals and both goal centres.
+    Returns our goal (=friendly), the enemy goal and the enemy goal centre.
+    """
     if friendly_aruco[0] > goals[0][0][0] and friendly_aruco[0] < goals[0][1][0]: #kunnen ook nog y waarden specifieren, maar op zich niet nodig
         friendly = goals[0] 
         enemy = goals[1]
@@ -217,31 +227,12 @@ def order_points(pts):
 	return rect
 
 def four_point_transform(image, pts):
+    
 	# obtain a consistent order of the points and unpack them
 	# individually
 	rect = order_points(pts)
-	# (tl, tr, br, bl) = rect
-	# compute the width of the new image, which will be the
-	# maximum distance between bottom-right and bottom-left
-	# x-coordiates or the top-right and top-left x-coordinates
-            # widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
-            # widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
-            # maxWidth = max(int(widthA), int(widthB))
 	maxWidth = 562
-	# print(maxWidth)
-	# compute the height of the new image, which will be the
-	# maximum distance between the top-right and bottom-right
-	# y-coordinates or the top-left and bottom-left y-coordinates
-            # heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
-            # heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
-            # maxHeight = max(int(heightA), int(heightB))
 	maxHeight = 385									#Better to have fixed frame size? -->@Robin
-	# print(maxHeight)
-	# now that we have the dimensions of the new image, construct
-	# the set of destination points to obtain a "birds eye view",
-	# (i.e. top-down view) of the image, again specifying points
-	# in the top-left, top-right, bottom-right, and bottom-left
-	# order
 	dst = np.array([
 		[0, 0],
 		[maxWidth - 1, 0],
@@ -251,10 +242,10 @@ def four_point_transform(image, pts):
 	M = cv2.getPerspectiveTransform(rect, dst)
 	warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
 	# return the warped image
-	# print(M)
 	return warped
 
 def green_dist(aruco, green_centre, goal_centre,weight):
+    #Find distance from friendly aruco to green blocks to scoring zone
     dist = np.zeros(len(green_centre))
     for i in range(len(green_centre)):
         d1 = np.sqrt((aruco[0]-green_centre[i][0])**2 + (aruco[1]-green_centre[i][1])**2)
@@ -264,6 +255,7 @@ def green_dist(aruco, green_centre, goal_centre,weight):
     return [green_centre[min],dist[min]]
 
 def red_dist(aruco, red_centre, goal_centre,weight):
+    #Find distance from friendly aruco to red blocks to scoring zone
     dist = np.zeros(len(red_centre))
     for i in range(len(red_centre)):
         d1 = np.sqrt((aruco[0]-red_centre[i][0])**2 + (aruco[1]-red_centre[i][1])**2)
@@ -273,6 +265,7 @@ def red_dist(aruco, red_centre, goal_centre,weight):
     return [red_centre[min],dist[min]]
 
 def blue_dist(aruco, blue_centre, goal_centre,weight):
+    #Find distance from friendly aruco to blue blocks to scoring zone
     dist = np.zeros(len(blue_centre))
     for i in range(len(blue_centre)):
         d1 = np.sqrt((aruco[0]-blue_centre[i][0])**2 + (aruco[1]-blue_centre[i][1])**2)
@@ -281,12 +274,28 @@ def blue_dist(aruco, blue_centre, goal_centre,weight):
     min = np.argmin(dist)
     return [blue_centre[min],dist[min]]
 
-def next_target(aruco, goal_centre, enemy_aruco, green_centre, red_centre, blue_centre, weights=[1,2,3]):
+def next_target(aruco, goal_centre, enemy_aruco, green_centre, red_centre, blue_centre, weights=[1,2,3], r=50):
+    """
+    Eliminates the block that the enemy aruco is holding from the list of potential candidates and finds next target of our robot.
+    Takes as input the coord. of friendly aruco, centre of enemy goal, enemy aruco and coord. of all blocks. A standard weight is given to the block colours.
+    The coord. of the next block that should be targeted is given as output
+    """
     green = [[281,192],10**6]
     red = [[281,192],10**7]
     blue = [[281,192],10**8]
 
-    # for i in [green_centre, red_centre,blue_centre]
+    #Kijken of vijand blokje niet vastheeft. Straal nu gekozen op r = 50
+    for i in green_centre:
+        if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
+            list.remove(i)
+    for i in red_centre:
+        if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
+            list.remove(i)
+    for i in blue_centre:
+        if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
+            list.remove(i)
+    
+    #Calculate distance from friendly aruco to block to scoring zones for all blocks found.
     if green_centre != []:
         green = green_dist(aruco, green_centre, goal_centre,weights[0])
     if red_centre != []:
