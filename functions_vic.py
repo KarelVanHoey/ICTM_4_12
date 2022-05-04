@@ -1,14 +1,15 @@
 import numpy as np
 import cv2
+from functions_karel import grab_image
 
-def init(cap, skip_frame=3):
+def init(skip_frame=3):
     pts = None
     frame = 0
 
     while pts is None:
         
         
-        ret, im = cap.read()
+        im = grab_image()
         # im = cv2.imread('playing_field_black_pictures/frame5.jpg')
         
         if frame > skip_frame:
@@ -50,7 +51,7 @@ def init(cap, skip_frame=3):
 
          # --> to not get duplicates in goals
         # _, im = cap.read()
-        ret, im = cap.read()
+        im = grab_image()
         warped = four_point_transform(im, pts) 
         imgray = cv2.cvtColor(warped,cv2.COLOR_BGR2GRAY)
         edges = cv2.Canny(imgray,20,100) #Note: met grijze goal was 2e 200
@@ -281,10 +282,12 @@ def blue_dist(aruco, blue_centre, goal_centre,weight):
     min = np.argmin(dist)
     return [blue_centre[min],dist[min]]
 
-def next_target(aruco, goal_centre,green_centre, red_centre, blue_centre, weights=[1,2,3]):
+def next_target(aruco, goal_centre, enemy_aruco, green_centre, red_centre, blue_centre, weights=[1,2,3]):
     green = [[281,192],10**6]
     red = [[281,192],10**7]
     blue = [[281,192],10**8]
+
+    # for i in [green_centre, red_centre,blue_centre]
     if green_centre != []:
         green = green_dist(aruco, green_centre, goal_centre,weights[0])
     if red_centre != []:
