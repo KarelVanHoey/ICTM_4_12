@@ -21,13 +21,14 @@ distance_thread.start()
 t = time.process_time()
 
 # Definition of colour ranges --> find via Finding_HSV.py
+# edit manually at beginning of game
 
 HSV_blue = np.array([[74, 112, 43], [179, 255, 255]])
 HSV_red = np.array([[0, 114, 68], [75, 255, 255]])
 HSV_green = np.array([[28, 67, 94], [128, 255, 255]])
 
 # Initialisation of field
-warped, pts, goal, goal_centre, field = init(grab_image())
+warped, pts, goal, goal_centre, field = init()
 
 # Finding of Aruco markers --> Karel
 aruco_friend = []
@@ -47,7 +48,7 @@ while True:
 
     warped, blue_in, green_in, red_in, blue_out, green_out, red_out = recognition(grab_image(), pts, enemy_goal, HSV_blue,HSV_red,HSV_green)
 
-    target = next_target(aruco_friend, enemy_goal_centre,green_out,red_out,blue_out)
+    target = next_target(aruco_friend, enemy_goal_centre, green_out,red_out,blue_out)
     toc = time.process_time_ns()
     cv2.drawContours(warped, field, -1, (255,68,204), 3)
     cv2.drawContours(warped, [np.array(friendly_goal,dtype="int32")], -1, (50,90,80), 3) #Note: deze structuur is nodig om normale array te kunnen gebruiken

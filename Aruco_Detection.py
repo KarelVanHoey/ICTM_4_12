@@ -1,7 +1,6 @@
 import cv2
 import cv2.aruco as aruco
 import numpy as np
-from functions_karel import contrast_enhancer
 
 # IP_adress = '192.168.1.15'
 # cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
