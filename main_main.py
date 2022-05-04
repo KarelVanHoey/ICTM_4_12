@@ -15,8 +15,9 @@ from Aruco_Detection import *
 global_img = None
 camera_thread = CameraFootage()
 camera_thread.start()
-distance_thread = DistanceArucoEnemy()
-distance_thread.start()
+time.sleep(3)
+# distance_thread = DistanceArucoEnemy()
+# distance_thread.start()
 
 # Beginning of time
 t = time.process_time()
@@ -34,7 +35,7 @@ warped, pts, goal, goal_centre, field = init()
 # Finding of Aruco markers --> Karel
 aruco_friend = []
 while aruco_friend == []:
-    aruco_friend, _ = our_position_heading(grab_image())
+    aruco_friend, _ = our_position_heading(four_point_transform(grab_image(), pts))
 
 # Deciding of enemy or friendly goal
 friendly_goal, enemy_goal, enemy_goal_centre = goal_allocation(aruco_friend, goal, goal_centre)
@@ -53,8 +54,8 @@ while True:
     toc = time.process_time_ns()
     cv2.drawContours(warped, field, -1, (255,68,204), 3)
     cv2.drawContours(warped, [np.array(friendly_goal,dtype="int32")], -1, (50,90,80), 3) #Note: deze structuur is nodig om normale array te kunnen gebruiken
-    cv2.circle(warped, target,radius=5,color=(255,255,255),thickness=-1) 
-    cv2.circle(warped, aruco_friend, radius=5,color=(0,0,0),thickness=-1)   
+    cv2.circle(warped, target, radius=5,color=(255,255,255),thickness=-1) 
+    cv2.circle(warped, np.array(aruco_friend,dtype="int32"), radius=5,color=(0,0,0),thickness=-1)   
     cv2.imshow('',warped)
 
     #Exit if requested: esc
