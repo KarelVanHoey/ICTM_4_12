@@ -13,11 +13,21 @@ from Aruco_Detection import *
 
 # Start camera thread that enables image requests through grab_image()
 global_img = None
+camera_lock = threading.Lock()
 camera_thread = CameraFootage()
 camera_thread.start()
 time.sleep(1)
+# global_distance = []
+# distance_lock = threading.Lock()
 # distance_thread = DistanceArucoEnemy()
 # distance_thread.start()
+stack_PC_lock = threading.Lock()
+global_ultra_sens = 0.0
+global_stack_robot_length = 0
+data_from_robot_lock = threading.Lock()
+
+stack_PC = []
+stop_flag = False
 
 # Beginning of time
 t = time.process_time()
