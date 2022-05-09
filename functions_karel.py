@@ -11,7 +11,7 @@ import bluetooth
 # Class that captures most recent image and stores it in a global variable (img)
 
 global_img = None
-global_distance = []
+global_distance = [0]
 global_ultra_sens = 0.0
 global_stack_robot_length = 0
 camera_lock = threading.Lock()
@@ -93,13 +93,14 @@ class DistanceArucoEnemy(threading.Thread):
         global M
         global maxWidth
         global maxHeight
-        local_img = grab_image_warped(M, maxWidth, maxHeight)
-        cX, cY, heading, ids, _ , _ = findAruco(local_img)
-        our_position, our_heading, _ , their_position, their_heading = positioning(cX, cY, heading, ids)
-        loc_distance, angle, rel_angle = distanceAruco(our_position, our_heading, their_position)
-        distance_lock.acquire()
-        global_distance = copy.deepcopy(loc_distance)
-        distance_lock.release()
+        while True:
+            local_img = grab_image_warped(M, maxWidth, maxHeight)
+            cX, cY, heading, ids, _ , _ = findAruco(local_img)
+            our_position, our_heading, _ , their_position, their_heading = positioning(cX, cY, heading, ids)
+            loc_distance, angle, rel_angle = distanceAruco(our_position, our_heading, their_position)
+            distance_lock.acquire()
+            global_distance = copy.deepcopy(loc_distance)
+            distance_lock.release()
 
 
 class ServerSendThread(threading.Thread): # defines class used in the thread that sends data to the robot
@@ -139,7 +140,7 @@ def server_send(threadName, port): # sends commands to robot based in keyboard i
     print("Accepted connection from ", address)
     while exitFlag == 0:
         stack_PC_lock.acquire()
-        if global_distance < 150 or stop_flag:
+        if global_distance[0] < 150 or stop_flag:
             message = 'stop'
             stack_PC = []
         elif stack_PC != []:
