@@ -2,9 +2,9 @@ import cv2
 import time
 from cv2 import imshow
 import numpy as np
-from transform import four_point_transform, order_points
-from playing_field import init, recognition, goal_allocation
-from distance import blue_dist, next_target
+from OLD.transform import four_point_transform, order_points
+from OLD.playing_field import init, recognition, goal_allocation
+from OLD.distance import blue_dist, next_target
 
 
 # Obtain image from video stream
@@ -43,6 +43,13 @@ while True:
     cv2.drawContours(warped, [np.array(friendly_goal,dtype="int32")], -1, (50,90,80), 3) #Note: deze structuur is nodig om normale array te kunnen gebruiken
     cv2.circle(warped, target,radius=5,color=(255,0,0),thickness=-1) 
     cv2.circle(warped, aruco_friend,radius=5,color=(0,0,0),thickness=-1)   
+    for j in blue:
+        cv2.circle(warped, j,radius=5,color=(255,0,0),thickness=-1)   
+    for j in red:
+        cv2.circle(warped, j,radius=5,color=(0,255,0),thickness=-1)   
+    for j in green:
+        cv2.circle(warped, j,radius=5,color=(0,0,255),thickness=-1)   
+       
     cv2.imshow('',warped)
 
     if toc- tic != 0:

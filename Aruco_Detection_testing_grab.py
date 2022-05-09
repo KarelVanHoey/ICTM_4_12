@@ -2,11 +2,12 @@ import cv2
 import cv2.aruco as aruco
 import numpy as np
 import time
+from functions_karel import *
 
-IP_adress = '192.168.1.15'
-cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
-# cap = cv2.VideoCapture(0)
-# # _, img = cap.read()
+# IP_adress = '192.168.1.15'
+# cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
+# # cap = cv2.VideoCapture(0)
+# # # _, img = cap.read()
 
 def findAruco(img, draw=False):
     # Aruco set-up
@@ -67,8 +68,12 @@ def positioning(cX, cY, heading, ids):
     
     return our_position, our_heading, their_ids, their_position, their_heading  # be careful: all arrays can be empty, so don't assume size!!
 
+camera_thread = CameraFootage()
+camera_thread.start()
+time.sleep(1)
+
 while True:
-    _, img = cap.read()
+    img = grab_image()
     # img = cv2.imread("aruco_transformed.png")  # make sure path is correct and terminal is in right folder
 
     # _, _, _, ids, img, corners = findAruco(img)
@@ -79,6 +84,7 @@ while True:
     cv2.imshow('img', img)
     if cv2.waitKey(1) == 113:       # Q-key as quit button
         break
+
 
 
 # img = cv2.imread("aruco_transformed.png")

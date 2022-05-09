@@ -2,8 +2,8 @@ import cv2
 import time
 from cv2 import imshow
 import numpy as np
-from transform import four_point_transform
-from playing_field import init, recognition, goal_allocation
+from OLD.transform import four_point_transform
+from OLD.playing_field import init, recognition, goal_allocation
 from distance import next_target
 
 

@@ -3,7 +3,7 @@ import cv2
 import time
 from cv2 import imshow
 import numpy as np
-from transform import four_point_transform, order_points
+from OLD.transform import four_point_transform, order_points
 
 def init(cap, skip_frame=3):
     warped = None
@@ -104,7 +104,7 @@ def recognition(cap, pts):
     lower_red = np.array([0, 109, 108]) 
     upper_red = np.array([179, 255, 255]) 
 
-    lower_green = np.array([17, 75, 102]) 
+    lower_green = np.array([31, 58, 101]) 
     upper_green = np.array([179, 255, 255])
 
     

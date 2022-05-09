@@ -4,7 +4,7 @@ from RRT_Game import RRTGraph
 from RRT_Game import RRTMap
 from Driving_commands import RRT_Drive
 import time
-from playing_field import init, recognition
+from OLD.playing_field import init, recognition
 import cv2
 
 

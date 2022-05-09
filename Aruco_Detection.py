@@ -1,12 +1,11 @@
 import cv2
 import cv2.aruco as aruco
 import numpy as np
-from functions_karel import contrast_enhancer
 
 # IP_adress = '192.168.1.15'
 # cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
 # _, img = cap.read()
-# img = cv2.imread("aruco_transformed_2.png")
+img = cv2.imread("aruco_transformed_2.png")
 
 def findAruco(img, draw=False):
     arucoDict = aruco.Dictionary_get(getattr(aruco, 'DICT_5X5_50'))
@@ -66,9 +65,9 @@ def positioning(cX, cY, heading, ids):
 
 
 def distanceAruco(our_position, our_heading, their_position):
-    distance = []       # absolute distance between our and other robot
-    angle = []          # angle in global coordinate system  of line between our and other robot
-    rel_angle = []      # angle to other robot as seen from our robot
+    distance = [0]       # absolute distance between our and other robot
+    angle = [0]          # angle in global coordinate system  of line between our and other robot
+    rel_angle = [0]      # angle to other robot as seen from our robot
     if our_position != [] and their_position != []:
         for x_i, y_i in their_position:
             distance.append(np.sqrt((x_i - our_position[0])**2 + (y_i - our_position[1])**2))
@@ -123,7 +122,17 @@ def enemyOrientation(img):                                                      
             x += 1 
             x = np.mod(x,360)
             img = clone.copy()
+        elif Key == 116:        # t-key
+            their_heading[0] -= np.pi/4
+            x -= 45
+            x = np.mod(x,360)
+            img = clone.copy()
+        elif Key == 84:        # capital T
+            their_heading[0] -= np.pi/180
+            x -= 1 
+            x = np.mod(x,360)
+            img = clone.copy()
         elif Key == 113:       # q-key as quit button
             break
     # x *= np.pi/180           # uncheck if wanted in radians
-    return x                   # returns # of degrees rotated counter clockwise
+    return x                   # returns # of degrees rotated counterclockwise (in the positive direction)
