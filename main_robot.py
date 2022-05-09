@@ -22,7 +22,7 @@ exitFlag = 0
 ###     - gate: move parameters correct ?
 
 # Message to PC:
-# # "length of Command_Stack, Ultrasonic sensor reading"
+# # "length of Command_Stack, Ultrasonic sensor reading [cm]"
 
 
 # Create your objects here.
@@ -100,7 +100,7 @@ def client_send(threadName, port, address):
         message += str(Ultra.distance_centimeters)
         message_as_bytes = message.encode()
         sock.send(message_as_bytes)
-        time.sleep(1)
+        time.sleep(0.5)
     sock.close()
 
 
