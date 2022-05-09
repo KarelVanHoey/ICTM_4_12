@@ -19,8 +19,6 @@ camera_thread.start()
 time.sleep(1)
 # global_distance = []
 # distance_lock = threading.Lock()
-# distance_thread = DistanceArucoEnemy()
-# distance_thread.start()
 stack_PC_lock = threading.Lock()
 global_ultra_sens = 0.0
 global_stack_robot_length = 0
@@ -77,3 +75,7 @@ while True:
     
     if cv2.waitKey(1) == 27:
         break
+
+
+# distance_thread = DistanceArucoEnemy()
+# distance_thread.start()

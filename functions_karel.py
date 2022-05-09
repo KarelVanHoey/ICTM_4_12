@@ -90,7 +90,10 @@ class DistanceArucoEnemy(threading.Thread):
     
     def run(self):
         global global_distance
-        local_img = grab_image()
+        global M
+        global maxWidth
+        global maxHeight
+        local_img = grab_image_warped(M, maxWidth, maxHeight)
         cX, cY, heading, ids, _ , _ = findAruco(local_img)
         our_position, our_heading, _ , their_position, their_heading = positioning(cX, cY, heading, ids)
         loc_distance, angle, rel_angle = distanceAruco(our_position, our_heading, their_position)

@@ -2,7 +2,7 @@
 from ev3dev2.motor import LargeMotor, OUTPUT_A, OUTPUT_B, OUTPUT_D, SpeedPercent, MediumMotor, MoveDifferential
 from ev3dev2.sensor import INPUT_1, INPUT_4
 from ev3dev2.sensor.lego import GyroSensor, UltrasonicSensor
-from ev3dev2.sound import Sound
+# from ev3dev2.sound import Sound
 from ev3dev2.wheel import Wheel
 
 import time
