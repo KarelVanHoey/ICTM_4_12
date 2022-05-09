@@ -5,11 +5,6 @@ from functions_vic import *
 from functions_karel import *
 from Aruco_Detection import *
 
-# NOT NEEDED ANYMORE: access image through grab_image_warped(M, maxWidth, maxHeight)
-# # Obtain image from video stream
-# # IP_adress = '192.168.1.15'
-# # cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
-# # cap = None
 
 # Start camera thread that enables image requests through grab_image_warped(M, maxWidth, maxHeight)
 global_img = None
@@ -47,7 +42,7 @@ M, goal, goal_centre, field = init_playing_field(maxWidth, maxHeight)
 # Finding of Aruco markers --> Karel
 aruco_friend = []
 while aruco_friend == []:
-    aruco_friend, _ = our_position_heading(grab_image_warped(M, maxWidth, maxHeight))
+    our_position, our_heading, _, _, _ = our_position_heading(grab_image_warped(M, maxWidth, maxHeight))
 
 # Deciding of enemy or friendly goal
 friendly_goal, enemy_goal, enemy_goal_centre = goal_allocation(aruco_friend, goal, goal_centre)
@@ -86,5 +81,5 @@ receiveport = 29
 pc_send_thread = ServerSendThread("sendthread", sendport)
 pc_receive_thread = ServerReceiveThread("receivethread", receiveport)
 
-pc_send_thread.start()
-pc_receive_thread.start()
+# pc_send_thread.start()
+# pc_receive_thread.start()

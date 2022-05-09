@@ -46,11 +46,11 @@ class RRT_Drive:
             else:
                 th.append(round(np.arctan((self.Y[i+1]-self.Y[i])/(self.X[i+1]-self.X[i]))*180/np.pi,1))
     
-        comm = [direction_facing]
+        comm = [direction_facing[0]]
         print("comm: ", comm)
-        for i in range(1,len(th)):
+        for i in range(0,len(th)):
             comm.append(round(th[i]-th[i-1],1))
-        return comm
+        return comm[1:]
     
     def get_distance(self):
         dis = []
@@ -63,8 +63,8 @@ class RRT_Drive:
 
 def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M):
 
-    dimensions =(562,385)
-    start = aruco_friend
+    dimensions =(385, 562)
+    start = tuple(aruco_friend)
     obsdim=30
     obstacle_coords = []
     img = grab_image_warped(M)
@@ -72,10 +72,13 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
     
 
     goal = tuple(target)
-    blue , green, red = (blue_in+blue_out,green_in+green_out,red_in+red_out)
+    blue, green, red = blue_in + blue_out, green_in + green_out, red_in + red_out
+
+    # blue , green, red = blue_out, green_out, red_out
     for e in [blue,green,red]:
         for i in range(len(e)):
-            obstacle_coords.append(list(e[i]))
+            if list(e[i]) != list(goal):
+                obstacle_coords.append(list(e[i]))
     iteration=0
     t1=0
 
@@ -127,7 +130,6 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
     print("angles: ", angles)
     print("distances: ", distances)
     print("\n")
-    pygame.display.update()
-    pygame.event.clear()
-    pygame.event.wait(500)
+    # pygame.display.update()
+    # pygame.event.clear()
     return angles, distances

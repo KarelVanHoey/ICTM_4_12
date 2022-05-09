@@ -137,8 +137,8 @@ def server_send(threadName, port): # sends commands to robot based in keyboard i
     server_sock.bind(("", port)) # same port as the receiving port on the ev3-brick
     server_sock.listen(1)  # listen for a connection
     client_sock, address = server_sock.accept()  # accept the connection
-    print("Accepted connection from ", address)
-    while exitFlag == 0:
+    print("Accepted connection from (send)", address)
+    while True:
         stack_PC_lock.acquire()
         if global_distance[0] < 150 or stop_flag:
             message = 'stop'
@@ -158,13 +158,13 @@ def server_send(threadName, port): # sends commands to robot based in keyboard i
 def server_receive(threadName, port): # prints received messages from robot
     global exitFlag
     global global_stack_robot_length
-    global_ultra_sens
+    global global_ultra_sens
     server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
     server_sock.bind(("", port))
     server_sock.listen(1)  # listen for a connection
     client_sock, address = server_sock.accept()  # accept the connection
-    print("Accepted connection from ", address)
-    while exitFlag == 0:
+    print("Accepted connection from (receive) ", address)
+    while True:
         message_as_bytes = client_sock.recv(1024)  # wait for answer
         message = message_as_bytes.decode()
         message_parsed = message.split(',')
