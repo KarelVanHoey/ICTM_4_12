@@ -51,7 +51,7 @@ def grab_image():
     return loc_img
 
 
-def grab_image_warped(M, maxWidth, maxHeight):
+def grab_image_warped(M, maxWidth=562, maxHeight=385):
     global global_img
     
     camera_lock.acquire()
