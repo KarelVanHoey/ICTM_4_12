@@ -5,6 +5,7 @@ import time
 from Aruco_Detection import our_position_heading
 from RRT_Game import RRTGraph
 from RRT_Game import RRTMap
+from functions_karel import grab_image_warped
 
 from functions_vic import init_playing_field, recognition
 
@@ -58,53 +59,20 @@ class RRT_Drive:
         return dis
 
     
-# def load_instructions(cap):
-#         dimensions =(512,512)
-#         Xs, Ys = ([],[])
-#         start=(50,50)
-#         goal = (300,300)
-#         obsdim=30 
-#         _, img = cap.read()
-#         _, pts, goal, _, _ = init_playing_field(maxWidth, maxHeight)
-#         _, blue, green, red = recognition(cap,pts)
-#         obstacle_coords = []
-#         for e in [blue,green,red]:
-#             for i in range(len(e)):
-#                 obstacle_coords.append(list(e[i]))
-#         print("obstacles: ",obstacle_coords)
-#         graph=RRTGraph(start,goal,dimensions,obsdim,obstacle_coords)
-#         print(start,goal,dimensions,obsdim,obstacle_coords)
-#         l = len(graph.getPathCoords())
-#         print("l : ", l)
-#         for e in graph.getPathCoords():
-#             Xs.append(e[0])
-#             Ys.append(e[1])
-#         Xs.reverse()
-#         Ys.reverse()
-#         print("\n")
-#         print(l)
-#         print("Xs: ", Xs)
-#         print("Ys: ", Ys)
-#         instructions = RRT_Drive(Xs,Ys)
-#         print("angles: ", instructions.get_angle(img))
-#         print("distances: ", instructions.get_distance())
-#         print("\n")
-#         angles = instructions.get_angle(img)
-#         distances = instructions.get_distance()
-#         return angles, distances
 
-def load_instructions_bis(cap, aruco_friend, direction_facing, target, pts, goal):
 
-    dimensions =(512,512)
+def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M):
+
+    dimensions =(562,385)
     start = aruco_friend
     obsdim=30
     obstacle_coords = []
-    _, img = cap.read()
+    img = grab_image_warped(M)
     cv2.imshow('image', img)
     
 
     goal = tuple(target)
-    _, blue, green, red = recognition(cap,pts)
+    blue , green, red = (blue_in+blue_out,green_in+green_out,red_in+red_out)
     for e in [blue,green,red]:
         for i in range(len(e)):
             obstacle_coords.append(list(e[i]))
@@ -159,8 +127,6 @@ def load_instructions_bis(cap, aruco_friend, direction_facing, target, pts, goal
     print("angles: ", angles)
     print("distances: ", distances)
     print("\n")
-
-    print(pts)
     pygame.display.update()
     pygame.event.clear()
     pygame.event.wait(500)
