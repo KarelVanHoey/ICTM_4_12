@@ -90,6 +90,9 @@ pc_receive_thread = ServerReceiveThread("receivethread", receiveport)
 #####################################################################################################
 
 
+##Global parameters
+
+
 class State:
     def __init__(self, previous=None):
         self.previous = previous
