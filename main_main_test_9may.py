@@ -69,11 +69,15 @@ while our_position == []: # loop is needed for if no aruco is found due to sudde
     warped, blue_in, green_in, red_in, blue_out, green_out, red_out = recognition(M, maxWidth, maxHeight, enemy_goal, HSV_blue,HSV_red, HSV_green)
     our_position, our_heading = our_position_heading(grab_image_warped(M, maxWidth, maxHeight))
 our_heading[0] *= 180 / np.pi
+while their_position == []:
+    warped, blue_in, green_in, red_in, blue_out, green_out, red_out = recognition(M, maxWidth, maxHeight, enemy_goal, HSV_blue,HSV_red, HSV_green)
+    their_positon, _ = their_position_heading(grab_image_warped(M,maxWidth,maxHeight))
+enemy_size = 60
 print(blue_in, green_in, red_in, blue_out, green_out, red_out)
 
 target = next_target(aruco_friend, enemy_goal_centre, [0,0], green_out, red_out, blue_out)
 
-angles, distances = load_instructions_bis(aruco_friend, our_heading, [318, 91], goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M)
+angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, their_position, enemy_size)
 
 print(angles, distances)
 print(len(angles), len(distances))
