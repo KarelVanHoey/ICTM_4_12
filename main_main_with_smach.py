@@ -100,27 +100,8 @@ class State:
     def __next__(self):
         raise NotImplementedError
 
-class INITIATION(State):
-    color = 'Initiation'
-    wait = 1
 
-    def execute(self):
-
-        #functions here
-        print(self.color)
-        sleep(self.wait)
-        #functions here
-
-        #   Transformation
-        #   playing field recognition
-        #   color adjustment blocks
-        #   direction enemy check (Aruco_detection_testing.py) -> make Get_enemy_info.py from latest function
-
-    def __next__(self):
-        if keyboard.is_pressed('q') == True:
-            return COLLISION(previous=self)
-        return GO_BLOCK(previous=self)
-
+######Initialisation out loop?
 
 class GO_BLOCK(State):
     color = 'GO_BLOCK'
@@ -130,7 +111,7 @@ class GO_BLOCK(State):
 
         #functions here
         print(self.color)
-        sleep(self.wait)
+        time.sleep(self.wait)
         #functions here
 
         #while distance >= 150:
@@ -144,6 +125,7 @@ class GO_BLOCK(State):
             #till dist to block return
             #return 'outcome1'
         # return 'error1'
+
     def __next__(self):
         if keyboard.is_pressed('q') == True:
             return COLLISION(previous=self)
@@ -157,7 +139,7 @@ class CLAIM(State):
 
         #functions here
         print(self.color)
-        sleep(self.wait)
+        time.sleep(self.wait)
         #functions here
 
         # global x
@@ -169,6 +151,7 @@ class CLAIM(State):
         #     #return
         #     return 'outcome2'
         # return 'error2'
+
     def __next__(self):
         if keyboard.is_pressed('q') == True:
             return COLLISION(previous=self)
@@ -182,7 +165,7 @@ class GO_ZONE(State):
 
         #functions here
         print(self.color)
-        sleep(self.wait)
+        time.sleep(self.wait)
         #functions here
 
         # global x
@@ -196,6 +179,7 @@ class GO_ZONE(State):
         #     # return
         #     return 'outcome3'
         # return 'error3'
+
     def __next__(self):
         if keyboard.is_pressed('q') == True:
             return COLLISION(previous=self)
@@ -209,7 +193,7 @@ class DROP(State):
 
         #functions here
         print(self.color)
-        sleep(self.wait)
+        time.sleep(self.wait)
         #functions here
 
         # global x
@@ -220,6 +204,7 @@ class DROP(State):
         #     # go to return
         #     return 'outcome4'
         # return 'error4'
+
     def __next__(self):
         if keyboard.is_pressed('q') == True:
             return COLLISION(previous=self)
@@ -233,7 +218,7 @@ class COLLISION(State):
         #functions here
         print(self.color)
         while keyboard.is_pressed('q') == True:
-            sleep(0.5)
+            time.sleep(0.5)
             print(self.color)
         #functions here
 
@@ -242,10 +227,9 @@ class COLLISION(State):
         #     # check intersect
         #     # calculate safe route out
         #     x=37
+
     def __next__(self):
-        if isinstance(self.previous, INITIATION):
-            return INITIATION(previous=self)
-        elif isinstance(self.previous, GO_BLOCK):
+        if isinstance(self.previous, GO_BLOCK):
             return GO_BLOCK(previous=self)
         elif isinstance(self.previous, CLAIM):
             return CLAIM(previous=self)
@@ -255,7 +239,7 @@ class COLLISION(State):
             return DROP(previous=self)
 
 class SMACH:
-    def __init__(self, initial_state = INITIATION()):
+    def __init__(self, initial_state = GO_BLOCK()):
         self.state = initial_state
 
     def __iter__(self):
