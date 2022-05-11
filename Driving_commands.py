@@ -22,21 +22,16 @@ from Aruco_Detection import positioning, findAruco, our_position_heading
 #Remark possibly need to adjust ange according to aruco after reaching every consecutive node?
 
 
-meters_per_pixles = 0.00526834
-D_wheel = 0.05
-Track_width = 0.125 
+#meters_per_pixles = 0.00508897
 
 class RRT_Drive:
     def __init__(self,X,Y):
         self.X = X
         self.Y = Y
         self.number_of_nodes = len(X)
-        print("initialized with: ", self.number_of_nodes)
 
     def get_angle(self, img, direction_facing):
-        cv2.imshow('test', img)
         th = []
-        print(self.number_of_nodes)
         for i in range(0,self.number_of_nodes-1):
             if self.X[i+1]-self.X[i] == 0:
                 if self.Y[i+1]-self.Y[i] > 0:
@@ -47,7 +42,6 @@ class RRT_Drive:
                 th.append(round(np.arctan((self.Y[i+1]-self.Y[i])/(self.X[i+1]-self.X[i]))*180/np.pi,1))
     
         comm = [direction_facing[0]]
-        print("comm: ", comm)
         for i in range(0,len(th)):
             comm.append(round(th[i]-th[i-1],1))
         return comm[1:]
@@ -61,14 +55,15 @@ class RRT_Drive:
     
 
 
-def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M):
+def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, show_image = 0):
 
     dimensions =(385, 562)
     start = tuple(aruco_friend)
     obsdim=30
     obstacle_coords = []
     img = grab_image_warped(M)
-    cv2.imshow('image', img)
+    if show_image:
+        cv2.imshow('image', img)
     
 
     goal = tuple(target)
@@ -94,7 +89,7 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
         elapsed=time.time()-t1
         t1=time.time()
         #raise exception if timeout
-        if elapsed > 10:
+        if elapsed > 2:
             print('Kon geen pad maken')
             raise
 
@@ -111,7 +106,8 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
                              map.edgeThickness)
 
         if iteration % 5 == 0:
-            pygame.display.update()
+            if show_image:
+                pygame.display.update()
         iteration += 1
 
     map.drawPath(graph.getPathCoords())
@@ -126,10 +122,10 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
     instructions = RRT_Drive(Xs,Ys)
     angles = instructions.get_angle(img, direction_facing)
     distances = instructions.get_distance()
-    print("\n")
-    print("angles: ", angles)
-    print("distances: ", distances)
-    print("\n")
+    # print("\n")
+    # print("angles: ", angles)
+    # print("distances: ", distances)
+    # print("\n")
     # pygame.display.update()
     # pygame.event.clear()
     return angles, distances
