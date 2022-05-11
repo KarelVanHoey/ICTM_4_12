@@ -2,13 +2,12 @@ import numpy as np
 import cv2
 from functions_karel import grab_image
 
-def init(maxWidth, maxHeight, skip_frame=3):
+def init_playing_field(maxWidth, maxHeight, skip_frame=3):
     """
     Initialises the playing field. Keeps running until a playing field has been found. With the coord. of this field, a
     transformation matrix is contructed and the image is transformed. From the transformed field the scoring zones are found.
     Returns the transformation matrix, the goals, the goal centre points and the field.
     """
-    #Note: maybe better to not return warped image and give transformation matrix instead of transformation points.
 
     pts = None
     frame = 0
@@ -27,7 +26,6 @@ def init(maxWidth, maxHeight, skip_frame=3):
             edges = cv2.Canny(imgray,20,200) #Note: eerste was origineel 100
             contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             
-            # imshow('',edges)
             for i in contours:
                 epsilon = .1*cv2.arcLength(i,True)
                 approx = cv2.approxPolyDP(i,epsilon,True)
@@ -45,20 +43,16 @@ def init(maxWidth, maxHeight, skip_frame=3):
         else:
             frame += 1
         if cv2.waitKey(1) == 27:
-            # print(warped)
             exit(0)
 
     # Goals and field
     goal = []
     goal_centre = []
     averages = []
-    
-    #
 
+    # Use while loop to remove duplicates that might have been detected.
     while len(goal) < 2:
         field = []
-
-         # --> to not get duplicates in goals
         im = grab_image()
         warped = cv2.warpPerspective(im, M,(maxWidth, maxHeight)) 
         imgray = cv2.cvtColor(warped,cv2.COLOR_BGR2GRAY)
@@ -96,16 +90,11 @@ def recognition(M, maxWidth, maxHeight, enemy, HSV_blue, HSV_red, HSV_green):
     
     """
 
-    ###
-
     # Image processing
     im = grab_image()
     # im = cv2.imread('playing_field_black_pictures/frame5.jpg')
     warped = cv2.warpPerspective(im, M,(maxWidth,maxHeight))
 
-
-    
-    
     # Finding of squares
     hsv = cv2.cvtColor(warped,cv2.COLOR_BGR2HSV) # image naar HSV waarden omzetten
     ## Threshold the HSV image to get only squares
@@ -122,8 +111,6 @@ def recognition(M, maxWidth, maxHeight, enemy, HSV_blue, HSV_red, HSV_green):
     squares_r_centre_out = []
     squares_b_centre_out = []
     squares_g_centre_out = []
-
-
     
     ### Blue
     res_b = cv2.bitwise_and(warped,warped, mask= mask_b)
@@ -167,8 +154,6 @@ def recognition(M, maxWidth, maxHeight, enemy, HSV_blue, HSV_red, HSV_green):
             else: 
                 squares_r_centre_out.append(np.array([x,y]))
 
-            
-
     ### Green
     res_g = cv2.bitwise_and(warped,warped, mask= mask_g)
     imgray = cv2.cvtColor(res_g,cv2.COLOR_BGR2GRAY)
@@ -189,14 +174,7 @@ def recognition(M, maxWidth, maxHeight, enemy, HSV_blue, HSV_red, HSV_green):
                 squares_g_centre_in.append(np.array([x,y]))
             else: 
                 squares_g_centre_out.append(np.array([x,y]))
-            
-    # # Drawing of contours --> can be uncommented for debugging
-    # cv2.drawContours(warped, field, -1, (255,68,204), 3)
-    # cv2.drawContours(warped, goal, -1, (50,90,80), 3)
-    # cv2.drawContours(warped, squares_r, -1, (0,0,255), 3)        
-    # cv2.drawContours(warped, squares_g, -1, (0,255,0), 3)        
-    # cv2.drawContours(warped, squares_b, -1, (255,0,0), 3)   
-    # cv2.imshow('',warped)
+
     return warped, squares_b_centre_in, squares_g_centre_in, squares_r_centre_in, squares_b_centre_out, squares_g_centre_out, squares_r_centre_out
 
 def goal_allocation(friendly_aruco, goals, goal_centres):
@@ -236,21 +214,15 @@ def order_points(pts):
 	return rect
 
 def four_point_transform(image, pts):
-	# obtain a consistent order of the points and unpack them
-	# individually
+    
+	# obtain a consistent order of the points 
 	rect = order_points(pts)
 	maxWidth = 562
-	maxHeight = 385									#Better to have fixed frame size? -->@Robin
-	dst = np.array([
-		[0, 0],
-		[maxWidth - 1, 0],
-		[maxWidth - 1, maxHeight - 1],
-		[0, maxHeight - 1]], dtype = "float32")
+	maxHeight = 385									
+	dst = np.array([[0, 0], [maxWidth - 1, 0], [maxWidth - 1, maxHeight - 1], [0, maxHeight - 1]], dtype = "float32")
 
-	# compute the perspective transform matrix and then apply it
+	# compute the perspective transform matrix
 	M = cv2.getPerspectiveTransform(rect, dst)
-	# warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
-	# return the warped image
 	return M
 
 def green_dist(aruco, green_centre, goal_centre,weight):
@@ -287,13 +259,16 @@ def next_target(aruco, goal_centre, enemy_aruco, green_centre, red_centre, blue_
     """
     Eliminates the block that the enemy aruco is holding from the list of potential candidates and finds next target of our robot.
     Takes as input the coord. of friendly aruco, centre of enemy goal, enemy aruco and coord. of all blocks. A standard weight is given to the block colours.
-    The coord. of the next block that should be targeted is given as output
+    The coord. of the next block that should be targeted is given as output.
+
+    NOTE: there must be looped untill a friendly aruco is found!!
     """
+    # Next target is the centre of the playing field if no blocks are found.
     green = [[281,192],10**6]
     red = [[281,192],10**7]
     blue = [[281,192],10**8]
 
-    #Kijken of vijand blokje niet vastheeft. Straal nu gekozen op r = 50
+    # Look if enemy is moving the block and removing these from the list.
     for i in green_centre:
         if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
             list.remove(i)

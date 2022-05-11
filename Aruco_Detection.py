@@ -65,9 +65,9 @@ def positioning(cX, cY, heading, ids):
 
 
 def distanceAruco(our_position, our_heading, their_position):
-    distance = []       # absolute distance between our and other robot
-    angle = []          # angle in global coordinate system  of line between our and other robot
-    rel_angle = []      # angle to other robot as seen from our robot
+    distance = [0]       # absolute distance between our and other robot
+    angle = [0]          # angle in global coordinate system  of line between our and other robot
+    rel_angle = [0]      # angle to other robot as seen from our robot
     if our_position != [] and their_position != []:
         for x_i, y_i in their_position:
             distance.append(np.sqrt((x_i - our_position[0])**2 + (y_i - our_position[1])**2))

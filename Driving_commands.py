@@ -1,12 +1,13 @@
 import numpy as np
-from pybricks.hubs import EV3Brick
-from pybricks.ev3devices import (Motor, TouchSensor, ColorSensor, InfraredSensor, UltrasonicSensor, GyroSensor)
-from pybricks.parameters import Port, Stop, Direction, Button, Color
-from pybricks.tools import wait, StopWatch, DataLog
-from pybricks.robotics import DriveBase
-from pybricks.media.ev3dev import SoundFile, ImageFile
 import cv2
+import pygame
+import time
 from Aruco_Detection import our_position_heading
+from RRT_Game import RRTGraph
+from RRT_Game import RRTMap
+from functions_karel import grab_image_warped
+
+from functions_vic import init_playing_field, recognition
 
 from Aruco_Detection import positioning, findAruco, our_position_heading
 #import Aruco_Detection
@@ -20,10 +21,6 @@ from Aruco_Detection import positioning, findAruco, our_position_heading
 #Then, calculate distance and use move command
 #Remark possibly need to adjust ange according to aruco after reaching every consecutive node?
 
-ev3 = EV3Brick()
-LM = Motor(Port.A, Direction.CLOCKWISE) #left motor
-RM = Motor(Port.D, Direction.CLOCKWISE) #right motor
-FM = Motor(Port.B, Direction.CLOCKWISE) #Front motor
 
 meters_per_pixles = 0.00526834
 D_wheel = 0.05
@@ -36,9 +33,10 @@ class RRT_Drive:
         self.number_of_nodes = len(X)
         print("initialized with: ", self.number_of_nodes)
 
-    def get_angle(self, img):
-        cv2.imshow('img', img)
+    def get_angle(self, img, direction_facing):
+        cv2.imshow('test', img)
         th = []
+        print(self.number_of_nodes)
         for i in range(0,self.number_of_nodes-1):
             if self.X[i+1]-self.X[i] == 0:
                 if self.Y[i+1]-self.Y[i] > 0:
@@ -47,16 +45,12 @@ class RRT_Drive:
                     th.append(-90)
             else:
                 th.append(round(np.arctan((self.Y[i+1]-self.Y[i])/(self.X[i+1]-self.X[i]))*180/np.pi,1))
-        print("HIER A")
     
-        print(our_position_heading(img)[1])
-        print("Hier B")
-        comm = [our_position_heading(img)[1]]
-        print(comm)
-        #comm = ["starting angle"]
-        for i in range(1,len(th)):
+        comm = [direction_facing[0]]
+        print("comm: ", comm)
+        for i in range(0,len(th)):
             comm.append(round(th[i]-th[i-1],1))
-        return comm
+        return comm[1:]
     
     def get_distance(self):
         dis = []
@@ -64,22 +58,78 @@ class RRT_Drive:
             dis.append(round(np.sqrt((self.X[i+1]-self.X[i])**2+(self.Y[i+1]-self.Y[i])**2),1))
         return dis
 
-    def execute_movements(self,Xs,Ys,n_movements,turn_rate=100,forward_speed=1080):
-        instructions = RRT_Drive(Xs,Ys)
-        th = instructions.get_angle()
-        dis = instructions.get_distance()
-        meters_per_pixles = 0.00526834
-        D_wheel = 0.05
-        Track_width = 0.125 
-        for i in range(n_movements):
-            #Turn in right direction
-            degrees_to_turn = Track_width/D_wheel*th[i]
+    
 
-            LM.on_for_degrees(turn_rate, th[i])
-            RM.on_for_degrees(turn_rate, -th[i])
 
-            #Move towards next node
-            degrees_to_turn = dis[i]*meters_per_pixles/(D_wheel*np.pi)*360
-            LM.on_for_degrees(forward_speed,degrees_to_turn)
-            RM.on_for_degrees(forward_speed,degrees_to_turn)
+def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M):
 
+    dimensions =(385, 562)
+    start = tuple(aruco_friend)
+    obsdim=30
+    obstacle_coords = []
+    img = grab_image_warped(M)
+    cv2.imshow('image', img)
+    
+
+    goal = tuple(target)
+    blue, green, red = blue_in + blue_out, green_in + green_out, red_in + red_out
+
+    # blue , green, red = blue_out, green_out, red_out
+    for e in [blue,green,red]:
+        for i in range(len(e)):
+            if list(e[i]) != list(goal):
+                obstacle_coords.append(list(e[i]))
+    iteration=0
+    t1=0
+
+    pygame.init()
+    map=RRTMap(start,goal,dimensions,obsdim,obstacle_coords)
+    graph=RRTGraph(start,goal,dimensions,obsdim,obstacle_coords)
+
+    obstacles=graph.makeobs()
+    map.drawMap(obstacles)
+
+    t1=time.time()
+    while (not graph.path_to_goal()):
+        elapsed=time.time()-t1
+        t1=time.time()
+        #raise exception if timeout
+        if elapsed > 10:
+            print('Kon geen pad maken')
+            raise
+
+        if iteration % 10 == 0:
+            X, Y, Parent = graph.bias(goal)
+            pygame.draw.circle(map.map, map.grey, (X[-1], Y[-1]), map.nodeRad*2, 0)
+            pygame.draw.line(map.map, map.Blue, (X[-1], Y[-1]), (X[Parent[-1]], Y[Parent[-1]]),
+                             map.edgeThickness)
+
+        else:
+            X, Y, Parent = graph.expand()
+            pygame.draw.circle(map.map, map.grey, (X[-1], Y[-1]), map.nodeRad*2, 0)
+            pygame.draw.line(map.map, map.Blue, (X[-1], Y[-1]), (X[Parent[-1]], Y[Parent[-1]]),
+                             map.edgeThickness)
+
+        if iteration % 5 == 0:
+            pygame.display.update()
+        iteration += 1
+
+    map.drawPath(graph.getPathCoords())
+
+    Xs, Ys = ([], [])
+    l = len(graph.getPathCoords())
+    for e in graph.getPathCoords():
+        Xs.append(e[0])
+        Ys.append(e[1])
+    Xs.reverse()
+    Ys.reverse()
+    instructions = RRT_Drive(Xs,Ys)
+    angles = instructions.get_angle(img, direction_facing)
+    distances = instructions.get_distance()
+    print("\n")
+    print("angles: ", angles)
+    print("distances: ", distances)
+    print("\n")
+    # pygame.display.update()
+    # pygame.event.clear()
+    return angles, distances
