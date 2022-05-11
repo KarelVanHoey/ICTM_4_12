@@ -190,8 +190,6 @@ class RRTGraph:
         if self.goalFlag:
             self.path = []
             self.path.append(self.goalstate)
-            print('goalstate=',  self.goalstate)
-            print('self.parent', self.parent)
             newpos = self.parent[self.goalstate]
             while (newpos != 0):
                 self.path.append(newpos)

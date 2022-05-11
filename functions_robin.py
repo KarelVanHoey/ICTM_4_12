@@ -8,6 +8,7 @@ import time
 from functions_karel import grab_image_warped
 
 
+
 class RRTMap:
     def __init__(self, start, goal, MapDimensions, obsdim, obstacle_coords):
         #start= our location, obsdim = size of squares (bound square)
