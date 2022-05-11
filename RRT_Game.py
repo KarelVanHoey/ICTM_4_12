@@ -72,10 +72,14 @@ class RRTGraph:
     def makeobs(self):
         obs = []
         for i in range(0, len(self.obstacle_coords)):
-            rectang = None
-            upper = (self.obstacle_coords[i][0] - self.obsDim/2,self.obstacle_coords[i][1] - self.obsDim/2)
-            rectang = pygame.Rect(upper, (self.obsDim, self.obsDim))
-            obs.append(rectang)
+            if len(self.obstacle_coords[i]) != 3:
+                rectang = None
+                upper = (self.obstacle_coords[i][0] - self.obsDim/2,self.obstacle_coords[i][1] - self.obsDim/2)
+                rectang = pygame.Rect(upper, (self.obsDim, self.obsDim))
+                obs.append(rectang)
+            if len(self.obstacle_coords) == 3:
+                rectang = None
+                upper = (self.obstacle_coords[i][0] - self.obstacle_coords[i][2]/2,self.obstacle_coords[i][1] - self.obstacle_coords[i][2]/2)
         self.obstacles = obs.copy()
         return obs
 
@@ -190,8 +194,6 @@ class RRTGraph:
         if self.goalFlag:
             self.path = []
             self.path.append(self.goalstate)
-            print('goalstate=',  self.goalstate)
-            print('self.parent', self.parent)
             newpos = self.parent[self.goalstate]
             while (newpos != 0):
                 self.path.append(newpos)

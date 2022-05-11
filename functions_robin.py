@@ -7,6 +7,10 @@ import pygame
 import time
 from functions_karel import grab_image_warped
 
+#Belangrijk: 
+# RRTMap en RRTGraph classes: voor path finding
+# RRT_Drive class: Bevat functies om hoeken en afstanden van gegenereerd pad te halen
+# Load instuctions bis: gebruikt alle bovenstaande om de padplanning uit te voeren en uiteindelijk de hoeken en afstanden v/d stukjes pad terug the geven.
 
 class RRTMap:
     def __init__(self, start, goal, MapDimensions, obsdim, obstacle_coords):
@@ -278,7 +282,19 @@ class RRT_Drive:
     
 
 
-def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, show_image = 0):
+def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, aruco_enemy, enemy_size, show_image = 0):
+
+    # aruco_friend: (van Karel) locatie van onze aruco/robot
+    # direction_facing: (van Karel) absolute hoek/ orientatie van onze aruco/robot
+    # taget: (van Victor) het blokje dat we gaan verplaatsen
+    # goal:(van Victor) locatie van de goals (centers, denk ik )
+    # blue/green/red_in/out: (van Victor) locatie van alle blokjes
+    # M:(van Victor) Nodig voor grab_image commandos
+    # aruco_enemy: (van Karel) mocatie van vijandige aruco/robot
+    # enemy size: grootte vijandige robot (voor obstacle avoidance)
+    # show image: standaard False, als True toont de pygame en cv grafiek
+
+
 
     dimensions =(385, 562)
     start = tuple(aruco_friend)
@@ -296,6 +312,8 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
     for e in [blue,green,red]:
         for i in range(len(e)):
             if list(e[i]) != list(goal):
+                if list(e[i]) == list(aruco_enemy):
+                    obstacle_coords.append(list(e[i])+[enemy_size])
                 obstacle_coords.append(list(e[i]))
     iteration=0
     t1=0
