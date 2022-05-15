@@ -4,6 +4,7 @@ import time
 from functions_vic import *
 from functions_karel import *
 from Aruco_Detection import *
+from functions_robin import *
 
 
 # Start camera thread that enables image requests through grab_image_warped(M, maxWidth, maxHeight)
@@ -12,15 +13,24 @@ camera_lock = threading.Lock()
 camera_thread = CameraFootage()
 camera_thread.start()
 time.sleep(1)
-global_distance = [0]               # distance between our and enemy aruco in pixels
+
 distance_lock = threading.Lock()
 stack_PC_lock = threading.Lock()
-global_ultra_sens = 0.0
-global_stack_robot_length = 0
 data_from_robot_lock = threading.Lock()
 
-stack_PC = []
+stack_PC = stack_object()
+global_distance = numerical_object(200)              # distance between our and enemy aruco in pixels
+global_ultra_sens = numerical_object()
+global_stack_robot_length = numerical_object()
 stop_flag = False
+
+sendport = 28
+receiveport = 29
+pc_send_thread = ServerSendThread("sendthread", sendport)
+pc_receive_thread = ServerReceiveThread("receivethread", receiveport)
+
+pc_send_thread.start()
+pc_receive_thread.start()
 
 # Beginning of time
 t = time.process_time()
@@ -76,13 +86,7 @@ while True:
 # distance_thread.start()
 
 
-sendport = 28
-receiveport = 29
-pc_send_thread = ServerSendThread("sendthread", sendport)
-pc_receive_thread = ServerReceiveThread("receivethread", receiveport)
 
-# pc_send_thread.start()
-# pc_receive_thread.start()
 
 
 #####################################################################################################

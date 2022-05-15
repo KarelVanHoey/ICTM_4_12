@@ -13,15 +13,15 @@ camera_lock = threading.Lock()
 camera_thread = CameraFootage()
 camera_thread.start()
 time.sleep(1)
-global_distance = [0]               # distance between our and enemy aruco in pixels
+
 distance_lock = threading.Lock()
 stack_PC_lock = threading.Lock()
-global_ultra_sens = 0.0
-global_stack_robot_length = 0
 data_from_robot_lock = threading.Lock()
 
-
-stack_PC = []
+stack_PC = stack_object()
+global_distance = numerical_object(200)              # distance between our and enemy aruco in pixels
+global_ultra_sens = numerical_object()
+global_stack_robot_length = numerical_object()
 stop_flag = False
 
 sendport = 28
@@ -63,27 +63,26 @@ red = []
 green = []
 blue = []
 our_position = []
+their_position = []
 
 # Giving of warped image, finding of vertices of goals, inner field and giving of coordinates
-while our_position == []: # loop is needed for if no aruco is found due to sudden movements.
+while (our_position == []) or (their_position == []): # loop is needed for if no aruco is found due to sudden movements.
     warped, blue_in, green_in, red_in, blue_out, green_out, red_out = recognition(M, maxWidth, maxHeight, enemy_goal, HSV_blue,HSV_red, HSV_green)
     our_position, our_heading = our_position_heading(grab_image_warped(M, maxWidth, maxHeight))
-our_heading[0] *= 180 / np.pi
-while their_position == []:
-    warped, blue_in, green_in, red_in, blue_out, green_out, red_out = recognition(M, maxWidth, maxHeight, enemy_goal, HSV_blue,HSV_red, HSV_green)
     their_positon, _ = their_position_heading(grab_image_warped(M,maxWidth,maxHeight))
+our_heading[0] *= 180 / np.pi
 enemy_size = 60
 print(blue_in, green_in, red_in, blue_out, green_out, red_out)
 
-target = next_target(aruco_friend, enemy_goal_centre, [0,0], green_out, red_out, blue_out)
+target = next_target(aruco_friend, enemy_goal_centre, their_position[0], green_out, red_out, blue_out)
 
 angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, their_position, enemy_size)
 
 print(angles, distances)
 print(len(angles), len(distances))
 
-stack_PC_lock.acquire()
-stack_PC = create_stack(angles, distances)
+# stack_PC_lock.acquire()
+stack_PC.write(create_stack(angles, distances))
 
 
 # distance_thread = DistanceArucoEnemy()
