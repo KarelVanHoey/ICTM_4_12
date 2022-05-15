@@ -131,21 +131,51 @@ class DistanceArucoEnemy(threading.Thread):
             our_position, our_heading, _ , their_position, their_heading = positioning(cX, cY, heading, ids)
             loc_distance, angle, rel_angle = distanceAruco(our_position, our_heading, their_position)
             # distance_lock.acquire()
-            self.global_distance.write(copy.deepcopy(loc_distance))
+            self.global_distance.write(copy.deepcopy(loc_distance[0]))
             # distance_lock.release()
 
 
 class ServerSendThread(threading.Thread): # defines class used in the thread that sends data to the robot
 
-    def __init__(self, name, port):
+    def __init__(self, name, port, stack_PC, global_distance):
         threading.Thread.__init__(self)
         self.name = name
         self.port = port
+        self.stack_PC = stack_PC
+        self.global_distance = global_distance
 
     def run(self):
         print("Starting sending as server: " + self.name)
-        server_send(self.name, self.port)
+        self.server_send(self.name, self.port)
         print("Stopping sending as server: " + self.name)
+    
+    def server_send(self, threadName, port):
+        server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+        server_sock.bind(("", port)) # same port as the receiving port on the ev3-brick
+        server_sock.listen(1)  # listen for a connection
+        client_sock, address = server_sock.accept()  # accept the connection
+        print("Accepted connection from (send)", address)
+        while True:
+            print('stack_PC (to be sent)=', self.stack_PC.read())
+            # stack_PC_lock.acquire()
+            if global_distance.read() < 150:
+                print('message to robot  = stop')
+                message = 'stop'
+                self.stack_PC.write([])
+            elif self.stack_PC.read() != []:
+                print('message to robot type = stack')
+                message = 'Command_Stack.write('
+                message += str(self.stack_PC.read()) + ')'
+                print("message to robot =", message)
+                self.stack_PC.write([])
+            else:
+                print('message to robot = None')
+                message = 'None'
+            # stack_PC_lock.release()
+            message_as_bytes = str.encode(message)
+            client_sock.send(message_as_bytes)
+            time.sleep(3)
+        print("stopping thread " + threadName)
 
 
 class ServerReceiveThread(threading.Thread): # defines class used in the thread that reveives data from the robot
@@ -161,32 +191,6 @@ class ServerReceiveThread(threading.Thread): # defines class used in the thread 
         print("Starting receiving as server: " + self.name)
         server_receive(self.name, self.port, self.stack_len, self.ultra_sens)
         print("Stopping receiving as server: " + self.name)
-
-
-def server_send(threadName, port): # sends commands to robot based in keyboard input
-    global stack_PC
-    global stop_flag
-    global global_distance
-    server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-    server_sock.bind(("", port)) # same port as the receiving port on the ev3-brick
-    server_sock.listen(1)  # listen for a connection
-    client_sock, address = server_sock.accept()  # accept the connection
-    print("Accepted connection from (send)", address)
-    while True:
-        stack_PC_lock.acquire()
-        if global_distance[0] < 150 or stop_flag:
-            message = 'stop'
-            stack_PC = []
-        elif stack_PC != []:
-            message = 'Command_Stack ='
-            message += str(stack_PC)
-            stack_PC = []
-        stack_PC_lock.release()
-        message_as_bytes = str.encode(message)
-        client_sock.send(message_as_bytes)
-        time.sleep(0.1)
-        stop_flag = False
-    print("stopping thread " + threadName)
 
 
 def server_receive(threadName, port, stack_len, ultra_sens): # prints received messages from robot

@@ -26,8 +26,8 @@ stop_flag = False
 
 sendport = 28
 receiveport = 29
-pc_send_thread = ServerSendThread("sendthread", sendport)
-pc_receive_thread = ServerReceiveThread("receivethread", receiveport)
+pc_send_thread = ServerSendThread("sendthread", sendport, stack_PC, global_distance)
+pc_receive_thread = ServerReceiveThread("receivethread", receiveport, global_stack_robot_length, global_ultra_sens)
 
 pc_send_thread.start()
 pc_receive_thread.start()
