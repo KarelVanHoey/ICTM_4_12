@@ -11,9 +11,9 @@ import bluetooth
 # Class that captures most recent image and stores it in a global variable (img)
 
 global_img = None
-global_distance = [200]
-global_ultra_sens = [0.0]
-global_stack_robot_length = [0]
+# global_distance = [200]
+# global_ultra_sens = [0.0]
+# global_stack_robot_length = [0]
 camera_lock = threading.Lock()
 distance_lock = threading.Lock()
 stack_PC_lock = threading.Lock()
@@ -33,10 +33,11 @@ class stack_object():
 
     def write(self, stack):
         # stack_PC_lock.acquire()
-        self.stack = copy.deepcopy(stack)
+        self.stack = stack
         # stack_PC_lock.release()
         return None
 
+# stack_PC = stack_object()
 
 class numerical_object():
 
@@ -120,8 +121,9 @@ class DistanceArucoEnemy(threading.Thread):
     def __init__(self, global_distance):
         threading.Thread.__init__(self)
         self.global_distance = global_distance
-    
+
     def run(self):
+        # global global_distance
         global M
         global maxWidth
         global maxHeight
@@ -131,18 +133,18 @@ class DistanceArucoEnemy(threading.Thread):
             our_position, our_heading, _ , their_position, their_heading = positioning(cX, cY, heading, ids)
             loc_distance, angle, rel_angle = distanceAruco(our_position, our_heading, their_position)
             # distance_lock.acquire()
-            self.global_distance.write(copy.deepcopy(loc_distance[0]))
+            self.global_distance.write(copy.deepcopy(loc_distance))
             # distance_lock.release()
 
 
 class ServerSendThread(threading.Thread): # defines class used in the thread that sends data to the robot
 
-    def __init__(self, name, port, stack_PC, global_distance):
+    def __init__(self, name, port, stack_PC, global_dist):
         threading.Thread.__init__(self)
         self.name = name
         self.port = port
         self.stack_PC = stack_PC
-        self.global_distance = global_distance
+        self.global_distance = global_dist
 
     def run(self):
         print("Starting sending as server: " + self.name)
@@ -158,8 +160,9 @@ class ServerSendThread(threading.Thread): # defines class used in the thread tha
         while True:
             print('stack_PC (to be sent)=', self.stack_PC.read())
             # stack_PC_lock.acquire()
-            if global_distance.read() < 150:
-                print('message to robot  = stop')
+            print('global_distance =', self.global_distance.read())
+            if self.global_distance.read()[0] < 150:
+                print('message to robot = stop')
                 message = 'stop'
                 self.stack_PC.write([])
             elif self.stack_PC.read() != []:
@@ -193,8 +196,8 @@ class ServerReceiveThread(threading.Thread): # defines class used in the thread 
         print("Stopping receiving as server: " + self.name)
 
 
+
 def server_receive(threadName, port, stack_len, ultra_sens): # prints received messages from robot
-    global exitFlag
     server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
     server_sock.bind(("", port))
     server_sock.listen(1)  # listen for a connection
