@@ -305,13 +305,13 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
         cv2.imshow('image', img)
     
 
-    goal = tuple(target)
+    target = tuple(target)
     blue, green, red = blue_in + blue_out, green_in + green_out, red_in + red_out
 
     # blue , green, red = blue_out, green_out, red_out
     for e in [blue,green,red]:
         for i in range(len(e)):
-            if list(e[i]) != list(goal):
+            if list(e[i]) != list(target):
                 if list(e[i]) == list(aruco_enemy):
                     obstacle_coords.append(list(e[i])+[enemy_size])
                 obstacle_coords.append(list(e[i]))
@@ -319,8 +319,8 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
     t1=0
 
     pygame.init()
-    map=RRTMap(start,goal,dimensions,obsdim,obstacle_coords)
-    graph=RRTGraph(start,goal,dimensions,obsdim,obstacle_coords)
+    map=RRTMap(start,target,dimensions,obsdim,obstacle_coords)
+    graph=RRTGraph(start,target,dimensions,obsdim,obstacle_coords)
 
     obstacles=graph.makeobs()
     map.drawMap(obstacles)
@@ -335,7 +335,7 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
             raise
 
         if iteration % 10 == 0:
-            X, Y, Parent = graph.bias(goal)
+            X, Y, Parent = graph.bias(target)
             pygame.draw.circle(map.map, map.grey, (X[-1], Y[-1]), map.nodeRad*2, 0)
             pygame.draw.line(map.map, map.Blue, (X[-1], Y[-1]), (X[Parent[-1]], Y[Parent[-1]]),
                              map.edgeThickness)
