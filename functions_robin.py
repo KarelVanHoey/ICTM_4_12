@@ -1,7 +1,16 @@
 import random
 import math
 import pygame
+import numpy as np
+import cv2
+import pygame
+import time
+from functions_karel import grab_image_warped
 
+#Belangrijk: 
+# RRTMap en RRTGraph classes: voor path finding
+# RRT_Drive class: Bevat functies om hoeken en afstanden van gegenereerd pad te halen
+# Load instuctions bis: gebruikt alle bovenstaande om de padplanning uit te voeren en uiteindelijk de hoeken en afstanden v/d stukjes pad terug the geven.
 
 class RRTMap:
     def __init__(self, start, goal, MapDimensions, obsdim, obstacle_coords):
@@ -241,3 +250,123 @@ class RRTGraph:
                 print((x, y))
 
         return path
+
+class RRT_Drive:
+    def __init__(self,X,Y):
+        self.X = X
+        self.Y = Y
+        self.number_of_nodes = len(X)
+
+    def get_angle(self, img, direction_facing):
+        th = []
+        for i in range(0,self.number_of_nodes-1):
+            if self.X[i+1]-self.X[i] == 0:
+                if self.Y[i+1]-self.Y[i] > 0:
+                    th.append(90)
+                else:
+                    th.append(-90)
+            else:
+                th.append(round(np.arctan((self.Y[i+1]-self.Y[i])/(self.X[i+1]-self.X[i]))*180/np.pi,1))
+    
+        comm = [direction_facing[0]]
+        for i in range(0,len(th)):
+            comm.append(round(th[i]-th[i-1],1))
+        return comm[1:]
+    
+    def get_distance(self):
+        dis = []
+        for i in range(0,self.number_of_nodes-1):
+            dis.append(round(np.sqrt((self.X[i+1]-self.X[i])**2+(self.Y[i+1]-self.Y[i])**2),1))
+        return dis
+
+    
+
+
+def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, aruco_enemy, enemy_size, show_image = 0):
+
+    # aruco_friend: (van Karel) locatie van onze aruco/robot
+    # direction_facing: (van Karel) absolute hoek/ orientatie van onze aruco/robot
+    # taget: (van Victor) het blokje dat we gaan verplaatsen
+    # goal:(van Victor) locatie van de goals (centers, denk ik )
+    # blue/green/red_in/out: (van Victor) locatie van alle blokjes
+    # M:(van Victor) Nodig voor grab_image commandos
+    # aruco_enemy: (van Karel) mocatie van vijandige aruco/robot
+    # enemy size: grootte vijandige robot (voor obstacle avoidance)
+    # show image: standaard False, als True toont de pygame en cv grafiek
+
+
+
+    dimensions =(385, 562)
+    start = tuple(aruco_friend)
+    obsdim=30
+    obstacle_coords = []
+    img = grab_image_warped(M)
+    if show_image:
+        cv2.imshow('image', img)
+    
+
+    target = tuple(target)
+    blue, green, red = blue_in + blue_out, green_in + green_out, red_in + red_out
+
+    # blue , green, red = blue_out, green_out, red_out
+    for e in [blue,green,red]:
+        for i in range(len(e)):
+            if list(e[i]) != list(target):
+                if list(e[i]) == list(aruco_enemy):
+                    obstacle_coords.append(list(e[i])+[enemy_size])
+                obstacle_coords.append(list(e[i]))
+    iteration=0
+    t1=0
+
+    pygame.init()
+    map=RRTMap(start,target,dimensions,obsdim,obstacle_coords)
+    graph=RRTGraph(start,target,dimensions,obsdim,obstacle_coords)
+
+    obstacles=graph.makeobs()
+    map.drawMap(obstacles)
+
+    t1=time.time()
+    while (not graph.path_to_goal()):
+        elapsed=time.time()-t1
+        t1=time.time()
+        #raise exception if timeout
+        if elapsed > 2:
+            print('Kon geen pad maken')
+            raise
+
+        if iteration % 10 == 0:
+            X, Y, Parent = graph.bias(target)
+            pygame.draw.circle(map.map, map.grey, (X[-1], Y[-1]), map.nodeRad*2, 0)
+            pygame.draw.line(map.map, map.Blue, (X[-1], Y[-1]), (X[Parent[-1]], Y[Parent[-1]]),
+                             map.edgeThickness)
+
+        else:
+            X, Y, Parent = graph.expand()
+            pygame.draw.circle(map.map, map.grey, (X[-1], Y[-1]), map.nodeRad*2, 0)
+            pygame.draw.line(map.map, map.Blue, (X[-1], Y[-1]), (X[Parent[-1]], Y[Parent[-1]]),
+                             map.edgeThickness)
+
+        if iteration % 5 == 0:
+            if show_image:
+                pygame.display.update()
+        iteration += 1
+
+    map.drawPath(graph.getPathCoords())
+
+    Xs, Ys = ([], [])
+    l = len(graph.getPathCoords())
+    for e in graph.getPathCoords():
+        Xs.append(e[0])
+        Ys.append(e[1])
+    Xs.reverse()
+    Ys.reverse()
+    instructions = RRT_Drive(Xs,Ys)
+    angles = instructions.get_angle(img, direction_facing)
+    distances = instructions.get_distance()
+    # print("\n")
+    # print("angles: ", angles)
+    # print("distances: ", distances)
+    # print("\n")
+    # pygame.display.update()
+    # pygame.event.clear()
+    return angles, distances

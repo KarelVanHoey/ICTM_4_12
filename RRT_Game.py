@@ -72,10 +72,14 @@ class RRTGraph:
     def makeobs(self):
         obs = []
         for i in range(0, len(self.obstacle_coords)):
-            rectang = None
-            upper = (self.obstacle_coords[i][0] - self.obsDim/2,self.obstacle_coords[i][1] - self.obsDim/2)
-            rectang = pygame.Rect(upper, (self.obsDim, self.obsDim))
-            obs.append(rectang)
+            if len(self.obstacle_coords[i]) != 3:
+                rectang = None
+                upper = (self.obstacle_coords[i][0] - self.obsDim/2,self.obstacle_coords[i][1] - self.obsDim/2)
+                rectang = pygame.Rect(upper, (self.obsDim, self.obsDim))
+                obs.append(rectang)
+            if len(self.obstacle_coords) == 3:
+                rectang = None
+                upper = (self.obstacle_coords[i][0] - self.obstacle_coords[i][2]/2,self.obstacle_coords[i][1] - self.obstacle_coords[i][2]/2)
         self.obstacles = obs.copy()
         return obs
 
@@ -150,7 +154,7 @@ class RRTGraph:
             self.add_edge(n1, n2)
             return True
 
-    def step(self, nnear, nrand, dmax=35):
+    def step(self, nnear, nrand, dmax=75):
         d = self.distance(nnear, nrand)
         if d > dmax:
             u = dmax / d
