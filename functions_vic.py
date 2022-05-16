@@ -289,5 +289,13 @@ def next_target(aruco, goal_centre, enemy_aruco, green_centre, red_centre, blue_
 
     min = np.argmin(np.array([green[1],red[1],blue[1]]))
     all = [green[0], red[0], blue[0]]
-    return all[min]
+    target = all[min]
+
+    if target in green_centre:
+        green_centre.remove(target)
+    if target in blue_centre:
+        blue_centre.remove(target)
+    if target in red_centre:
+        red_centre.remove(target)
+    return target, green_centre, red_centre, blue_centre
 

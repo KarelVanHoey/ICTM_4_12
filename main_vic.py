@@ -57,7 +57,7 @@ while True:
         warped, blue_in, green_in, red_in, blue_out, green_out, red_out = recognition(M, maxWidth, maxHeight, enemy_goal, HSV_blue,HSV_red,HSV_green)
         aruco_friend, _ = our_position_heading(grab_image_warped(M, maxWidth, maxHeight))
 
-    target = next_target(aruco_friend, enemy_goal_centre, [0,0], green_out, red_out, blue_out)
+    target, green_out, red_out, blue_out = next_target(aruco_friend, enemy_goal_centre, [0,0], green_out, red_out, blue_out)
     toc = time.process_time_ns()
     cv2.drawContours(warped, field, -1, (255,68,204), 3)
     cv2.drawContours(warped, [np.array(friendly_goal,dtype="int32")], -1, (50,90,80), 3) #Note: deze structuur is nodig om normale array te kunnen gebruiken
