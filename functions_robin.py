@@ -259,19 +259,19 @@ class RRT_Drive:
 
     def get_angle(self, img, direction_facing):
         th = []
-        for i in range(0,self.number_of_nodes-1):
+        for i in range(1,self.number_of_nodes-1):
             if self.X[i+1]-self.X[i] == 0:
                 if self.Y[i+1]-self.Y[i] > 0:
                     th.append(90)
                 else:
                     th.append(-90)
             else:
-                th.append(round(np.arctan((self.Y[i+1]-self.Y[i])/(self.X[i+1]-self.X[i]))*180/np.pi,1))
+                th.append(round(np.arctan2((self.Y[i+1]-self.Y[i])/(self.X[i+1]-self.X[i]))*180/np.pi,1))
     
-        comm = [np.arctan((self.Y[0]/self.X[0])-direction_facing[0])*180/np.pi]
+        comm = [np.arctan2((self.Y[0]/self.X[0])-direction_facing[0])*180/np.pi]
         for i in range(0,len(th)):
             comm.append(round(th[i]-th[i-1],1))
-        return comm[1:]
+        return comm
     
     def get_distance(self):
         millimeter_per_pixel = 0.1965035
@@ -313,12 +313,13 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
     
     for e in [blue,green,red]:
         for i in range(len(e)):
-            #if list(e[i]) != list(target):
-            if list(e[i]) == list(aruco_enemy):
-                obstacle_coords.append(list(e[i])+[enemy_size])
             obstacle_coords.append(list(e[i]))
-    # if list(target) in obstacle_coords:
-    #     obstacle_coords.remove(list(target))
+    for e in aruco_enemy:
+        obstacle_coords.append(list(e[i])+[enemy_size])
+
+    # print('target:' target,  'obstacle_coords:', obstacle_coords, type(target), type(obstacle_coords))
+    # if target in obstacle_coords:
+    #     obstacle_coords.remove(target)
     iteration=0
     t1=0
 
