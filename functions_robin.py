@@ -310,6 +310,7 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
     blue, green, red = blue_in + blue_out, green_in + green_out, red_in + red_out
 
     # blue , green, red = blue_out, green_out, red_out
+    
     for e in [blue,green,red]:
         for i in range(len(e)):
             if list(e[i]) == list(aruco_enemy):
