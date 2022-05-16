@@ -44,13 +44,14 @@ while aruco_friend == []:
 # Deciding of enemy or friendly goal
 friendly_goal, enemy_goal, enemy_goal_centre = goal_allocation(aruco_friend, goal, goal_centre)
 
+dt = []
 # Rest of recognition
 while True:
     red = []
     green = []
     blue = []
     aruco_friend = []
-
+    tic = time.process_time_ns()
     # Giving of warped image, finding of vertices of goals, inner field and giving of coordinates
     while aruco_friend == []: # loop is needed for if no aruco is found due to sudden movements.
         warped, blue_in, green_in, red_in, blue_out, green_out, red_out = recognition(M, maxWidth, maxHeight, enemy_goal, HSV_blue,HSV_red,HSV_green)
@@ -64,6 +65,9 @@ while True:
     cv2.circle(warped, np.array(aruco_friend,dtype="int32"), radius=5,color=(255,0,127),thickness=-1)   
     cv2.imshow('',warped)
     #Exit if requested: esc
-    
+    if toc - tic != 0:
+        dt.append(toc-tic)
     if cv2.waitKey(1) == 27:
         break
+
+print(1/(np.average(dt)*10**(-9)))
