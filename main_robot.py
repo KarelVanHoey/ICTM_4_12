@@ -4,6 +4,7 @@ from ev3dev2.sensor import INPUT_1, INPUT_4
 from ev3dev2.sensor.lego import GyroSensor, UltrasonicSensor
 # from ev3dev2.sound import Sound
 from ev3dev2.wheel import Wheel
+import copy
 
 import time
 import threading
@@ -36,8 +37,27 @@ Gyro = GyroSensor(INPUT_4)                # Gyro sensor
 # Stack with commands to be executed
 # Commands have the following form: [CommandType, Value]
 
-Command_Stack = []
 Command_Stack_lock = threading.Lock()
+
+class stack_object():
+
+    def __init__(self):
+        self.stack = []
+
+    def read(self):
+        Command_Stack_lock.acquire()
+        loc_stack = copy.deepcopy(self.stack)
+        Command_Stack_lock.release()
+        return loc_stack
+
+    def write(self, stack):
+        Command_Stack_lock.acquire()
+        self.stack = stack
+        Command_Stack_lock.release()
+        return None
+
+Command_Stack = stack_object()
+
 
 class ICTM_Wheel(Wheel):    # Wheel class used to scale commands, so that a 90° turn command becomes a 90° movement
     def __init__(self):
@@ -49,7 +69,7 @@ mdiff = MoveDifferential(OUTPUT_A, OUTPUT_D, ICTM_Wheel, 195)
 
 mdiff.odometry_start() # needed for gyro
 mdiff.gyro = Gyro
-speed = 30
+speed = 50
 
 class ClientSendThread(threading.Thread):
 
@@ -92,20 +112,20 @@ class DriveThread(threading.Thread):
 
 
 def client_send(threadName, port, address):
-
+    # global Command_Stack
     sock=bluetooth.BluetoothSocket( bluetooth.RFCOMM ) # initiate socket, the channel on the ev3-brick
     sock.connect((address, port)) # connect the socket to the computer given the mac-adress and port
     while True:
-        message = str(len(Command_Stack)) + ','
-        message += str(Ultra.distance_centimeters)
+        message = str(len(Command_Stack.read())) + ','
+        message += str(float(Ultra.distance_centimeters))
         message_as_bytes = message.encode()
         sock.send(message_as_bytes)
-        time.sleep(0.5)
+        time.sleep(2)
     sock.close()
 
 
 def client_receive(threadName, port, address):
-    global Command_Stack
+    # global Command_Stack
     sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM) # initiate socket, the channel on the ev3-brick
     sock.connect((address, port)) # connect the socket to the computer given the mac-adress and port
     while True:
@@ -113,18 +133,21 @@ def client_receive(threadName, port, address):
         message = message_as_bytes.decode()
         if message == 'stop':
             mdiff.off()
-            Command_Stack_lock.acquire()
-            Command_Stack = []
-            Command_Stack_lock.release()
+            # Command_Stack_lock.acquire()
+            Command_Stack.write([])
+            # Command_Stack_lock.release()
         else:
-            Command_Stack_lock.acquire()
+            # Command_Stack_lock.acquire()
+            print("robot: stack lock acquired")
             exec(message)
-            Command_Stack_lock.release()
+            print(str(Command_Stack.read()))
+            # Command_Stack_lock.release()
+            time.sleep(0.5)
     sock.close()
 
 
 def drive(threadName):
-    global Command_Stack
+    # global Command_Stack
     global speed
 
     # # make sure that the gate is up at the start
@@ -132,10 +155,12 @@ def drive(threadName):
     # FM.wait_until_not_moving()
 
     while True:
-        Command_Stack_lock.acquire()
-        if Command_Stack != []:
-            command, value = Command_Stack[0][0], Command_Stack[0][1]
-            Command_Stack.pop(0)
+        # Command_Stack_lock.acquire()
+        loc_stack = copy.deepcopy(Command_Stack.read())
+        if loc_stack != []:
+            command, value = loc_stack[0][0], loc_stack[0][1]
+            loc_stack.pop(0)
+            Command_Stack.write(loc_stack)
             if command == 'transl':
                 mdiff.on_for_distance(speed, value, block=False, brake=True)
             elif command == 'rot':
@@ -143,7 +168,7 @@ def drive(threadName):
             elif command == 'gate':
                 FM.on_for_rotations(SpeedPercent(20), -0.45 * value) # up: value == 1; down: value == -1
             mdiff.wait_until_not_moving()
-        Command_Stack_lock.release()
+        # Command_Stack_lock.release()
 
             # if that doesn't work try this:
             # while not mdiff.wait_until_not_moving():

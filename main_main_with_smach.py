@@ -4,6 +4,7 @@ import time
 from functions_vic import *
 from functions_karel import *
 from Aruco_Detection import *
+from functions_robin import *
 
 
 # Start camera thread that enables image requests through grab_image_warped(M, maxWidth, maxHeight)
@@ -12,15 +13,24 @@ camera_lock = threading.Lock()
 camera_thread = CameraFootage()
 camera_thread.start()
 time.sleep(1)
-global_distance = [0]               # distance between our and enemy aruco in pixels
+
 distance_lock = threading.Lock()
 stack_PC_lock = threading.Lock()
-global_ultra_sens = 0.0
-global_stack_robot_length = 0
 data_from_robot_lock = threading.Lock()
 
-stack_PC = []
+stack_PC = stack_object()
+global_distance = numerical_object(200)              # distance between our and enemy aruco in pixels
+global_ultra_sens = numerical_object()
+global_stack_robot_length = numerical_object()
 stop_flag = False
+
+sendport = 28
+receiveport = 29
+pc_send_thread = ServerSendThread("sendthread", sendport)
+pc_receive_thread = ServerReceiveThread("receivethread", receiveport)
+
+pc_send_thread.start()
+pc_receive_thread.start()
 
 # Beginning of time
 t = time.process_time()
@@ -76,20 +86,10 @@ while True:
 # distance_thread.start()
 
 
-sendport = 28
-receiveport = 29
-pc_send_thread = ServerSendThread("sendthread", sendport)
-pc_receive_thread = ServerReceiveThread("receivethread", receiveport)
 
-# pc_send_thread.start()
-# pc_receive_thread.start()
 
 
 #####################################################################################################
-#---------------------------------------------------------------------------------------------------#
-#####################################################################################################
-
-
 class State:
     def __init__(self, previous=None):
         self.previous = previous
@@ -101,22 +101,17 @@ class State:
         raise NotImplementedError
 
 
-######Initialisation out loop?
-
 class GO_BLOCK(State):
-    color = 'GO_BLOCK'
-    wait = 1
 
     def execute(self):
 
         #functions here
-        print(self.color)
-        time.sleep(self.wait)
+        while global_distance.read() >= 150:
+            aruco_friend, aruco_heading =  our_position_heading(grab_image_warped(M, maxWidth, maxHeight))
         #functions here
 
         #while distance >= 150:
             #Aruco detection
-            #Your state execution goes here
             #Calculate cost and select
             #Path planning (angle & distance)
             #make stack
@@ -132,14 +127,12 @@ class GO_BLOCK(State):
         return CLAIM(previous=self)
 
 class CLAIM(State):
-    color = 'CLAIM'
-    wait = 1
-
+    
     def execute(self):
 
         #functions here
-        print(self.color)
-        time.sleep(self.wait)
+        
+
         #functions here
 
         # global x
@@ -158,14 +151,12 @@ class CLAIM(State):
         return GO_ZONE(previous=self)
             
 class GO_ZONE(State):
-    color = 'GO_ZONE'
-    wait = 1
-
+    
     def execute(self):
 
         #functions here
-        print(self.color)
-        time.sleep(self.wait)
+        
+
         #functions here
 
         # global x
@@ -186,14 +177,12 @@ class GO_ZONE(State):
         return DROP(previous=self)
             
 class DROP(State):
-    color = 'DROP'
-    wait = 1
-
+    
     def execute(self):
 
         #functions here
-        print(self.color)
-        time.sleep(self.wait)
+
+
         #functions here
 
         # global x
@@ -211,15 +200,12 @@ class DROP(State):
         return GO_BLOCK(previous=self)
 
 class COLLISION(State):
-    color = '!!COLLISION!!'
 
     def execute(self):
 
         #functions here
-        print(self.color)
-        while keyboard.is_pressed('q') == True:
-            time.sleep(0.5)
-            print(self.color)
+        
+        
         #functions here
 
         # global x
@@ -250,6 +236,20 @@ class SMACH:
         self.state.execute()
         self.state = next(self.state)
         return self
+
+######Initialisation
+    # De inititialisatie zit niet meer in een State
+    # De initialisatie mag hier of bovenaan
+    # we gaan alle code uiteindelijk ook in een file steken-> dwz alles van functions_karel, functions_victor en dergelijke naar hier(boven) kopieren
+
+######execution of the loop
+    # Alle code moet komen in de #functions here# intervallen in elk van de vijf 'state'classes
+    # er moet niets gebeuren qua return of dergelijke
+    # er is ook een test file 
+    #de statement 'if keyboard.is_pressed('q') == True:' in elke next function mag je voorlopig skippen, tenzij je al met distance wil 
+
+#Als het te ingewikkeld is om alle variabelen en functies in de classes te steken heb ik een backup gemaakt (eigenlijk gewoon een while loop)
+#deze heet State_machine_backup.py
 
 for i in SMACH():
     pass

@@ -2,10 +2,6 @@ import cv2
 import cv2.aruco as aruco
 import numpy as np
 
-IP_adress = '192.168.1.15'
-cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
-_, img = cap.read()
-#img = cv2.imread("aruco_transformed_2.png")
 
 def findAruco(img, draw=False):
     arucoDict = aruco.Dictionary_get(getattr(aruco, 'DICT_5X5_50'))
@@ -146,7 +142,7 @@ def enemyOrientation(img):                                                      
     x *= np.pi/180             # uncheck if wanted in radians
     return x                   # returns # of radians rotated counterclockwise (in the positive direction)
 
-x = enemyOrientation(img)
-print(x)
-their_position, their_heading = their_position_heading(img)
-print(their_position, their_heading)
+# x = enemyOrientation(img)
+# print(x)
+# their_position, their_heading = their_position_heading(img)
+# print(their_position, their_heading)

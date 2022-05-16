@@ -1,6 +1,7 @@
 from time import sleep
 import keyboard
 
+
 class State:
     def __init__(self, previous=None):
         self.previous = previous
@@ -16,7 +17,6 @@ class INITIATION(State):
     wait = 1
 
     def execute(self):
-
         #functions here
         print(self.color)
         sleep(self.wait)
@@ -38,7 +38,7 @@ class GO_BLOCK(State):
     wait = 1
 
     def execute(self):
-
+        print(self.z)
         #functions here
         print(self.color)
         sleep(self.wait)
@@ -88,9 +88,8 @@ class CLAIM(State):
 class GO_ZONE(State):
     color = 'GO_ZONE'
     wait = 1
-
+    
     def execute(self):
-
         #functions here
         print(self.color)
         sleep(self.wait)
