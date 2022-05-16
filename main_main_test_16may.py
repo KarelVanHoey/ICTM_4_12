@@ -20,8 +20,8 @@ stack_PC_lock = threading.Lock()
 data_from_robot_lock = threading.Lock()
 
 stack_PC = stack_object()
-global_distance = numerical_object(val=200)              # distance between our and enemy aruco in pixels
-global_ultra_sens = numerical_object()
+global_distance = numerical_object(val=200.0)              # distance between our and enemy aruco in pixels
+global_ultra_sens = numerical_object(val=6.0)
 global_stack_robot_length = numerical_object()
 stop_flag = False
 
