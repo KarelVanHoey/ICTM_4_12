@@ -271,13 +271,13 @@ def next_target(aruco, goal_centre, enemy_aruco, green_centre, red_centre, blue_
     # Look if enemy is moving the block and removing these from the list.
     for i in green_centre:
         if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
-            list.remove(i)
+            green_centre.remove(i) #was origineel list.remove(i)
     for i in red_centre:
         if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
-            list.remove(i)
+            red_centre.remove(i)
     for i in blue_centre:
         if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
-            list.remove(i)
+            blue_centre.remove(i)
     
     #Calculate distance from friendly aruco to block to scoring zones for all blocks found.
     if green_centre != []:
