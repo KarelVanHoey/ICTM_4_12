@@ -268,15 +268,16 @@ class RRT_Drive:
             else:
                 th.append(round(np.arctan((self.Y[i+1]-self.Y[i])/(self.X[i+1]-self.X[i]))*180/np.pi,1))
     
-        comm = [direction_facing[0]]
+        comm = [np.arctan((self.Y[0]/self.X[0])-direction_facing[0])*180/np.pi]
         for i in range(0,len(th)):
             comm.append(round(th[i]-th[i-1],1))
         return comm[1:]
     
     def get_distance(self):
+        millimeter_per_pixel = 0.1965035
         dis = []
         for i in range(0,self.number_of_nodes-1):
-            dis.append(round(np.sqrt((self.X[i+1]-self.X[i])**2+(self.Y[i+1]-self.Y[i])**2),1))
+            dis.append(round(millimeter_per_pixel*np.sqrt((self.X[i+1]-self.X[i])**2+(self.Y[i+1]-self.Y[i])**2),1))
         return dis
 
     
