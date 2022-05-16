@@ -269,15 +269,15 @@ def next_target(aruco, goal_centre, enemy_aruco, green_centre, red_centre, blue_
     blue = [[281,192],10**8]
 
     # Look if enemy is moving the block and removing these from the list.
-    for i in green_centre:
-        if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
-            green_centre.remove(i) #was origineel list.remove(i)
-    for i in red_centre:
-        if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
-            red_centre.remove(i)
-    for i in blue_centre:
-        if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
-            blue_centre.remove(i)
+    # for i in green_centre:
+    #     if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
+    #         green_centre.remove(i) #was origineel list.remove(i)
+    # for i in red_centre:
+    #     if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
+    #         red_centre.remove(i)
+    # for i in blue_centre:
+    #     if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
+    #         blue_centre.remove(i)
     
     #Calculate distance from friendly aruco to block to scoring zones for all blocks found.
     if green_centre != []:
@@ -291,11 +291,30 @@ def next_target(aruco, goal_centre, enemy_aruco, green_centre, red_centre, blue_
     all = [green[0], red[0], blue[0]]
     target = all[min]
 
-    if target in green_centre:
-        green_centre.remove(target)
-    if target in blue_centre:
-        blue_centre.remove(target)
-    if target in red_centre:
-        red_centre.remove(target)
-    return target, green_centre, red_centre, blue_centre
+    green =[]
+    red= []
+    blue = []
+
+    for i in green_centre:
+        
+        if not (target[0]+2 > i[0]  and target[0]-2 < i[0] ) or not (target[1]+2 > i[1]  and target[1]-2 < i[1] ):
+            
+            green.append(i)
+
+    for i in blue_centre:
+        if not (target[0]+2 > i[0]  and target[0]-2 < i[0] ) or not (target[1]+2 > i[1]  and target[1]-2 < i[1] ):
+            blue.append(i)
+
+    for i in red_centre:
+        if not (target[0]+2 > i[0]  and target[0]-2 < i[0] ) or not (target[1]+2 > i[1]  and target[1]-2 < i[1] ):
+            red.append(i)
+    # if target.any() in green_centre:
+    #     green_centre.remove(target)
+    # if target.any() in blue_centre:
+    #     blue_centre.remove(target)
+    # if target.any() in red_centre:
+    #     red_centre.remove(target)
+    # print(target)
+    # print(blue)
+    return target, green, red, blue
 
