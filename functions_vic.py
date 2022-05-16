@@ -297,16 +297,16 @@ def next_target(aruco, goal_centre, enemy_aruco, green_centre, red_centre, blue_
 
     for i in green_centre:
         
-        if not (target[0]+2 > i[0]  and target[0]-2 < i[0] ) or not (target[1]+2 > i[1]  and target[1]-2 < i[1] ):
+        if not (target[0]+3 > i[0]  and target[0]-3 < i[0] ) or not (target[1]+3 > i[1]  and target[1]-3 < i[1] ):
             
             green.append(i)
 
     for i in blue_centre:
-        if not (target[0]+2 > i[0]  and target[0]-2 < i[0] ) or not (target[1]+2 > i[1]  and target[1]-2 < i[1] ):
+        if not (target[0]+3 > i[0]  and target[0]-3 < i[0] ) or not (target[1]+3 > i[1]  and target[1]-3 < i[1] ):
             blue.append(i)
 
     for i in red_centre:
-        if not (target[0]+2 > i[0]  and target[0]-2 < i[0] ) or not (target[1]+2 > i[1]  and target[1]-2 < i[1] ):
+        if not (target[0]+3 > i[0]  and target[0]-3 < i[0] ) or not (target[1]+3 > i[1]  and target[1]-3 < i[1] ):
             red.append(i)
     # if target.any() in green_centre:
     #     green_centre.remove(target)

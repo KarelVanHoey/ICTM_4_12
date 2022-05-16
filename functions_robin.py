@@ -159,7 +159,7 @@ class RRTGraph:
             self.add_edge(n1, n2)
             return True
 
-    def step(self, nnear, nrand, dmax=35):
+    def step(self, nnear, nrand, dmax=70):
         d = self.distance(nnear, nrand)
         if d > dmax:
             u = dmax / d
@@ -257,7 +257,7 @@ class RRT_Drive:
         self.Y = Y
         self.number_of_nodes = len(X)
 
-    def get_angle(self, img, direction_facing):
+    def get_angle(self, img, direction_facing, aruco_friend):
         th = []
         for i in range(1,self.number_of_nodes-1):
             if self.X[i+1]-self.X[i] == 0:
@@ -266,15 +266,24 @@ class RRT_Drive:
                 else:
                     th.append(-90)
             else:
-                th.append(round(np.arctan2((self.Y[i+1]-self.Y[i])/(self.X[i+1]-self.X[i]))*180/np.pi,1))
+                th.append(round(np.arctan2((self.Y[i+1]-self.Y[i]), (self.X[i+1]-self.X[i]))*180/np.pi,1))
     
-        comm = [np.arctan2((self.Y[0]/self.X[0])-direction_facing[0])*180/np.pi]
+        angle_0 = np.arctan2(-self.Y[1] + aruco_friend[1], self.X[1] - aruco_friend[0]) * (180/np.pi) - direction_facing[0]
+        if angle_0 < -180:
+            angle_0 += 360
+        elif angle_0 > 180:
+            angle0 -= 360
+        comm = [angle_0]
+        print("atan:", np.arctan2(self.Y[1] - aruco_friend[1], self.X[1] - aruco_friend[0]))
+        print("direct:", direction_facing[0])
+        print('comm', comm)
+        print('directin facingh', direction_facing[0])
         for i in range(0,len(th)):
             comm.append(round(th[i]-th[i-1],1))
         return comm
     
     def get_distance(self):
-        millimeter_per_pixel = 0.1965035
+        millimeter_per_pixel = 1 / 0.1965035
         dis = []
         for i in range(0,self.number_of_nodes-1):
             dis.append(round(millimeter_per_pixel*np.sqrt((self.X[i+1]-self.X[i])**2+(self.Y[i+1]-self.Y[i])**2),1))
@@ -299,7 +308,7 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
 
     dimensions =(385, 562)
     start = tuple(aruco_friend)
-    obsdim=30
+    obsdim=70
     obstacle_coords = []
     img = grab_image_warped(M)
     if show_image:
@@ -314,8 +323,8 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
     for e in [blue,green,red]:
         for i in range(len(e)):
             obstacle_coords.append(list(e[i]))
-    for e in aruco_enemy:
-        obstacle_coords.append(list(e[i])+[enemy_size])
+    print('aruco_enemy', aruco_enemy)
+    obstacle_coords.append(list(aruco_enemy)+[enemy_size])
 
     # print('target:' target,  'obstacle_coords:', obstacle_coords, type(target), type(obstacle_coords))
     # if target in obstacle_coords:
@@ -366,7 +375,7 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
     Xs.reverse()
     Ys.reverse()
     instructions = RRT_Drive(Xs,Ys)
-    angles = instructions.get_angle(img, direction_facing)
+    angles = instructions.get_angle(img, direction_facing, aruco_friend)
     distances = instructions.get_distance()
     # print("\n")
     # print("angles: ", angles)
