@@ -101,8 +101,10 @@ def grab_image_warped(M, maxWidth=562, maxHeight=385):
 
 # Creates stack from list of distances and angles
 
-def create_stack(list_angles, list_distances):
+def create_stack(list_angles, list_distances, angle_0=[]):
     stack = []
+    if angle_0 != []:
+        stack.append(['rot', angle_0])
     for i in range(len(list_angles)):
         stack.append(['rot', list_angles[i]])
         stack.append(['transl', list_distances[i]])
