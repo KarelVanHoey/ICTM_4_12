@@ -313,9 +313,10 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
     
     for e in [blue,green,red]:
         for i in range(len(e)):
-            if list(e[i]) == list(aruco_enemy):
-                obstacle_coords.append(list(e[i])+[enemy_size])
             obstacle_coords.append(list(e[i]))
+    for e in aruco_enemy:
+        obstacle_coords.append(list(e[i])+[enemy_size])
+
     # print('target:' target,  'obstacle_coords:', obstacle_coords, type(target), type(obstacle_coords))
     # if target in obstacle_coords:
     #     obstacle_coords.remove(target)
