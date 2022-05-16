@@ -90,6 +90,15 @@ while True:
 
 
 #####################################################################################################
+class State:
+    def __init__(self, previous=None):
+        self.previous = previous
+
+    def execute(self, userdata):
+        raise NotImplementedError
+
+    def __next__(self):
+        raise NotImplementedError
 
 
 class GO_BLOCK(State):
@@ -97,7 +106,8 @@ class GO_BLOCK(State):
     def execute(self):
 
         #functions here
-
+        while global_distance.read() >= 150:
+            aruco_friend, aruco_heading =  our_position_heading(grab_image_warped(M, maxWidth, maxHeight))
         #functions here
 
         #while distance >= 150:
@@ -228,7 +238,7 @@ class SMACH:
         return self
 
 ######Initialisation
-    # De inititialisatie zit niet meet in een State
+    # De inititialisatie zit niet meer in een State
     # De initialisatie mag hier of bovenaan
     # we gaan alle code uiteindelijk ook in een file steken-> dwz alles van functions_karel, functions_victor en dergelijke naar hier(boven) kopieren
 
