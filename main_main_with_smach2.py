@@ -71,9 +71,6 @@ enemy_offset = enemyOrientation(grab_image())
 #All fixed parameters
 HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M
 
-
-#   ???????????????????
-
 # Rest of recognition
 while True:
     red = []
@@ -134,14 +131,45 @@ class GO_BLOCK(State):
         self.Collision = 0
 
     def execute(self):
-
-        #functions here
         if global_distance.read() >= 150:
-            aruco_friend, aruco_heading =  our_position_heading(grab_image_warped(self.M, self.maxWidth, self.maxHeight))
+            #localization and target selection
+            
+            red = []
+            green = []
+            blue = []
+            aruco_friend = []
+
+                                            # Giving of warped image, finding of vertices of goals, inner field and giving of coordinates
+            while aruco_friend == []:       # loop is needed for if no aruco is found due to sudden movements.
+                _, blue_in, green_in, red_in, blue_out, green_out, red_out = recognition(self.M, self.maxWidth, self.maxHeight, self.enemy_goal, self.HSV_blue, self.HSV_red,self.HSV_green)
+                aruco_friend, our_heading = our_position_heading(grab_image_warped(self.M, self.maxWidth, self.maxHeight))
+                their_position, _ = their_position_heading(grab_image_warped(self.M,self.maxWidth,self.maxHeight))
+
+            our_heading[0] *= 180 / np.pi
+            enemy_size = 120
+
+            target, green_out, red_out, blue_out = next_target(aruco_friend, self.enemy_goal_centre, their_position[0], green_out, red_out, blue_out)
+            #toc = time.process_time_ns()
+
+            #path plannning
+            angles = []
+            distances = []
+            angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, self.M, their_position[0], enemy_size)
+            #uses goal -> is goal == [friendly_goal, enemy_goal]? @Robin -> functions_robin.py line 300 neemt aan dat dit centers zijn?
+            time.sleep(10)
+
+            #create and push stack
+            temp_stack = create_stack(angles, distances)
+            print('temp_stack made')
+            print(temp_stack)
+            stack_PC.write(temp_stack)
+            print("stack written")
+            print("stack on PC: ", stack_PC.read())
+            # stack_PC_lock.release()
+            print("stack_PC_lock released")
         else:
             self.Collision = 1
             pass
-        #functions here
 
         #while distance >= 150:
             #Aruco detection
@@ -189,12 +217,59 @@ class CLAIM(State):
         return GO_ZONE(previous=self)
             
 class GO_ZONE(State):
+    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M):
+        self.HSV_blue = HSV_blue
+        self.HSV_red = HSV_red
+        self.HSV_green = HSV_green
+        self.maxWidth = maxWidth
+        self.maxHeight = maxHeight 
+        self.friendly_goal = friendly_goal
+        self.enemy_goal = enemy_goal
+        self.enemy_goal_centre = enemy_goal_centre
+        self.field = field
+        self.enemy_offset = enemy_offset
+        self.M = M
+        self.Collision = 0
     
     def execute(self):
 
         #functions here
         if global_distance.read() >= 150:
-            aruco_friend, aruco_heading =  our_position_heading(grab_image_warped(self.M, self.maxWidth, self.maxHeight))
+            #detection of objects
+            red = []
+            green = []
+            blue = []
+            aruco_friend = []
+
+                                            # Giving of warped image, finding of vertices of goals, inner field and giving of coordinates
+            while aruco_friend == []:       # loop is needed for if no aruco is found due to sudden movements.
+                _, blue_in, green_in, red_in, blue_out, green_out, red_out = recognition(self.M, self.maxWidth, self.maxHeight, self.enemy_goal, self.HSV_blue, self.HSV_red,self.HSV_green)
+                aruco_friend, our_heading = our_position_heading(grab_image_warped(self.M, self.maxWidth, self.maxHeight))
+                their_position, _ = their_position_heading(grab_image_warped(self.M,self.maxWidth,self.maxHeight))
+
+            our_heading[0] *= 180 / np.pi
+            enemy_size = 120
+
+            target = self.enemy_goal_centre
+            #toc = time.process_time_ns()
+
+            #path plannning
+            angles = []
+            distances = []
+            angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, self.M, their_position[0], enemy_size)
+            #uses goal -> is goal == [friendly_goal, enemy_goal]? @Robin -> functions_robin.py line 300 neemt aan dat dit centers zijn?
+            time.sleep(10)
+
+            #create and push stack
+            temp_stack = create_stack(angles, distances)
+            print('temp_stack made')
+            print(temp_stack)
+            stack_PC.write(temp_stack)
+            print("stack written")
+            print("stack on PC: ", stack_PC.read())
+            # stack_PC_lock.release()
+            print("stack_PC_lock released")
+
         else:
             self.Collision = 1
             pass

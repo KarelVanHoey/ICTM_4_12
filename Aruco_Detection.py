@@ -143,6 +143,10 @@ def enemyOrientation(img):                                                      
     x *= np.pi/180             # uncheck if wanted in radians
     return x                   # returns # of radians rotated counterclockwise (in the positive direction)
 
+# IP_adress = '192.168.1.15'
+# cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
+# _, img = cap.read()
+
 # x = enemyOrientation(img)
 # print(x)
 # cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
