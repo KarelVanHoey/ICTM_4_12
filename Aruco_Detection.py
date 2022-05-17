@@ -1,7 +1,7 @@
 import cv2
 import cv2.aruco as aruco
 import numpy as np
-
+import copy
 
 def findAruco(img, draw=False):
     arucoDict = aruco.Dictionary_get(getattr(aruco, 'DICT_5X5_50'))
@@ -95,8 +95,9 @@ def their_position_heading(img, x=0.0):
 def enemyOrientation(img):                                                      #tested with aruco_transformed_2.png
     x = 0
     their_position, their_heading = their_position_heading(img)
-    clone1 = img.copy()                                                          #used to redraw arrows in enemyOrientation(img)
-    clone2 = img.copy() 
+    clone1 = copy.deepcopy(img)                                                 #used to redraw arrows in enemyOrientation(img)
+    clone2 = copy.deepcopy(img)
+    
     while True:
         R = [100*np.cos(their_heading[0]), -100*np.sin(their_heading[0])]       #rotation amount
         A = [round(num) for num in their_position[0]]                           #start position arrow
@@ -116,22 +117,22 @@ def enemyOrientation(img):                                                      
             their_heading[0] += np.pi/4
             x += 45
             x = np.mod(x,360)
-            clone1 = clone2.copy()
+            clone1 = copy.deepcopy(clone2)
         elif Key == 82:        # Capital R
             their_heading[0] += np.pi/180
             x += 1 
             x = np.mod(x,360)
-            clone1 = clone2.copy()
+            clone1 = copy.deepcopy(clone2)
         elif Key == 116:        # t-key
             their_heading[0] -= np.pi/4
             x -= 45
             x = np.mod(x,360)
-            clone1 = clone2.copy()
+            clone1 = copy.deepcopy(clone2)
         elif Key == 84:        # capital T
             their_heading[0] -= np.pi/180
             x -= 1 
             x = np.mod(x,360)
-            clone1 = clone2.copy()
+            clone1 = copy.deepcopy(clone2)
         elif Key == 113:       # q-key as quit button
             break
 
@@ -144,5 +145,9 @@ def enemyOrientation(img):                                                      
 
 # x = enemyOrientation(img)
 # print(x)
-# their_position, their_heading = their_position_heading(img)
-# print(their_position, their_heading)
+# cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
+# _, img2 = cap.read()
+# img3 = copy.deepcopy(img2)
+# aap, beer = their_position_heading(img2)
+# aap1, beer1 = their_position_heading(img3, x)
+# print(aap, beer, aap1, beer1)
