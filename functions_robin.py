@@ -12,6 +12,14 @@ from functions_karel import grab_image_warped
 # RRT_Drive class: Bevat functies om hoeken en afstanden van gegenereerd pad te halen
 # Load instuctions bis: gebruikt alle bovenstaande om de padplanning uit te voeren en uiteindelijk de hoeken en afstanden v/d stukjes pad terug the geven.
 
+
+def condition_angle(angle):
+    if angle < -180:
+        angle += 360
+    elif angle > 180:
+        angle -= 360
+    return angle
+
 class RRTMap:
     def __init__(self, start, goal, MapDimensions, obsdim, obstacle_coords):
         #start= our location, obsdim = size of squares (bound square)
@@ -159,7 +167,7 @@ class RRTGraph:
             self.add_edge(n1, n2)
             return True
 
-    def step(self, nnear, nrand, dmax=70):
+    def step(self, nnear, nrand, dmax=90):
         d = self.distance(nnear, nrand)
         if d > dmax:
             u = dmax / d
@@ -259,27 +267,27 @@ class RRT_Drive:
 
     def get_angle(self, img, direction_facing, aruco_friend):
         th = []
-        for i in range(1,self.number_of_nodes-1):
+        for i in range(0,self.number_of_nodes-1):
             if self.X[i+1]-self.X[i] == 0:
                 if self.Y[i+1]-self.Y[i] > 0:
                     th.append(90)
                 else:
                     th.append(-90)
             else:
+                # th.append(condition_angle(round(np.arctan((self.Y[i+1]-self.Y[i]) / (self.X[i+1]-self.X[i]))*180/np.pi,1)))
                 th.append(round(np.arctan2((self.Y[i+1]-self.Y[i]), (self.X[i+1]-self.X[i]))*180/np.pi,1))
     
-        angle_0 = np.arctan2(-self.Y[1] + aruco_friend[1], self.X[1] - aruco_friend[0]) * (180/np.pi) - direction_facing[0]
-        if angle_0 < -180:
-            angle_0 += 360
-        elif angle_0 > 180:
-            angle0 -= 360
+        # angle_0 = -(np.arctan((self.Y[1] - aruco_friend[1]) / (self.X[1] - aruco_friend[0])) * (180/np.pi) - direction_facing[0])
+        angle_0 = np.arctan2((self.Y[1] - aruco_friend[1]), (self.X[1] - aruco_friend[0])) * (180/np.pi) + direction_facing[0]
+        angle_0 = condition_angle(angle_0)
         comm = [angle_0]
-        print("atan:", np.arctan2(self.Y[1] - aruco_friend[1], self.X[1] - aruco_friend[0]))
-        print("direct:", direction_facing[0])
-        print('comm', comm)
-        print('directin facingh', direction_facing[0])
+        # print("atan:", np.arctan((self.Y[1] - aruco_friend[1]) / (self.X[1] - aruco_friend[0])))
+        # print("direct:", direction_facing[0])
+        # print('comm', comm)
+        # print('direction facing', direction_facing[0])
+        th.pop(1)
         for i in range(0,len(th)):
-            comm.append(round(th[i]-th[i-1],1))
+            comm.append(condition_angle(round(th[i]-th[i-1],1)))
         return comm
     
     def get_distance(self):
@@ -308,7 +316,7 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
 
     dimensions =(385, 562)
     start = tuple(aruco_friend)
-    obsdim=70
+    obsdim=50
     obstacle_coords = []
     img = grab_image_warped(M)
     if show_image:
