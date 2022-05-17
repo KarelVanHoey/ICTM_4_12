@@ -258,7 +258,7 @@ class GO_ZONE(State):
             distances = []
             angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, self.M, their_position[0], enemy_size)
             #uses goal -> is goal == [friendly_goal, enemy_goal]? @Robin -> functions_robin.py line 300 neemt aan dat dit centers zijn?
-            time.sleep(10)
+            # time.sleep(10)
 
             #create and push stack
             temp_stack = create_stack(angles, distances)
@@ -366,7 +366,7 @@ class SMACH:
     # Alle code moet komen in de #functions here# intervallen in elk van de vijf 'state'classes
     # er moet niets gebeuren qua return of dergelijke
     # er is ook een test file 
-    #de statement 'if keyboard.is_pressed('q') == True:' in elke next function mag je voorlopig skippen, tenzij je al met distance wil 
+    # de statement 'if keyboard.is_pressed('q') == True:' in elke next function mag je voorlopig skippen, tenzij je al met distance wil 
 
 #Als het te ingewikkeld is om alle variabelen en functies in de classes te steken heb ik een backup gemaakt (eigenlijk gewoon een while loop)
 #deze heet State_machine_backup.py
