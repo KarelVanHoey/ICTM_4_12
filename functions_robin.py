@@ -281,13 +281,21 @@ class RRT_Drive:
         angle_0 = np.arctan2((self.Y[1] - aruco_friend[1]), (self.X[1] - aruco_friend[0])) * (180/np.pi) + direction_facing[0]
         angle_0 = condition_angle(angle_0)
         comm = [angle_0]
+        print("th:",th)
+        print(self.Y[1], aruco_friend[1])
+        print(self.Y)
+        print(aruco_friend)
+        print("aruco_heading", direction_facing)
+        print(comm)
         # print("atan:", np.arctan((self.Y[1] - aruco_friend[1]) / (self.X[1] - aruco_friend[0])))
         # print("direct:", direction_facing[0])
         # print('comm', comm)
         # print('direction facing', direction_facing[0])
-        th.pop(0)
-        for i in range(0,len(th)):
+        print("th voor", th)
+        print("th na", th)
+        for i in range(1,len(th)):
             comm.append(condition_angle(round(th[i]-th[i-1],1)))
+        print("comm", comm)
         return comm
     
     def get_distance(self):
@@ -349,7 +357,7 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
 
     #Kan rectstreeks pad gemaakt worden?
     if not graph.crossObstacle(aruco_friend[0],target[0],aruco_friend[1],target[1]):
-        variable = [[aruco_friend[0],aruco_friend[1]],[target[0],target[1]]]
+        variable = [[target[0],target[1]],[aruco_friend[0],aruco_friend[1]]] 
         print("variable: ",variable)
         pygame.draw.circle(map.map, map.grey, (target[0], target[1]), map.nodeRad*2, 0)
         pygame.draw.circle(map.map, map.grey, (aruco_friend[0], aruco_friend[1]), map.nodeRad*2, 0)
