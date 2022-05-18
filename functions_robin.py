@@ -360,8 +360,8 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
             elapsed=time.time()-t1
             t1=time.time()
             #raise exception if timeout
-            if elapsed > 2:
-                print('Kon geen pad maken binnen 2 seconden')
+            if elapsed > 3:
+                print('Kon geen pad maken binnen 3 seconden')
                 raise
 
             if iteration % 10 == 0:
