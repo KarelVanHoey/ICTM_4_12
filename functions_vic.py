@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from functions_karel import grab_image
+from functions_karel import grab_image, grab_image_warped
 
 def init_playing_field(maxWidth, maxHeight, skip_frame=3):
     """
@@ -91,9 +91,8 @@ def recognition(M, maxWidth, maxHeight, enemy, HSV_blue, HSV_red, HSV_green):
     """
 
     # Image processing
-    im = grab_image()
+    warped = grab_image_warped(M, maxWidth, maxHeight)
     # im = cv2.imread('playing_field_black_pictures/frame5.jpg')
-    warped = cv2.warpPerspective(im, M,(maxWidth,maxHeight))
 
     # Finding of squares
     hsv = cv2.cvtColor(warped,cv2.COLOR_BGR2HSV) # image naar HSV waarden omzetten
@@ -269,15 +268,15 @@ def next_target(aruco, goal_centre, enemy_aruco, green_centre, red_centre, blue_
     blue = [[281,192],10**8]
 
     # Look if enemy is moving the block and removing these from the list.
-    # for i in green_centre:
-    #     if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
-    #         green_centre.remove(i) #was origineel list.remove(i)
-    # for i in red_centre:
-    #     if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
-    #         red_centre.remove(i)
-    # for i in blue_centre:
-    #     if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
-    #         blue_centre.remove(i)
+    for i in green_centre:
+        if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
+            green_centre.remove(i) #was origineel list.remove(i)
+    for i in red_centre:
+        if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
+            red_centre.remove(i)
+    for i in blue_centre:
+        if (i[0] - enemy_aruco[0])**2 + (i[1] - enemy_aruco[1])**2 < r:
+            blue_centre.remove(i)
     
     #Calculate distance from friendly aruco to block to scoring zones for all blocks found.
     if green_centre != []:
