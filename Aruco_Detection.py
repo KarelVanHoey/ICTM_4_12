@@ -98,7 +98,7 @@ def enemyOrientation(img):                                                      
     clone1 = copy.deepcopy(img)                                                 #used to redraw arrows in enemyOrientation(img)
     clone2 = copy.deepcopy(img)
     
-    while True:
+    while True and len(their_heading) != 0:
         R = [100*np.cos(their_heading[0]), -100*np.sin(their_heading[0])]       #rotation amount
         A = [round(num) for num in their_position[0]]                           #start position arrow
         B = [0, 0]                                                              #end position arrow calculation
@@ -134,6 +134,7 @@ def enemyOrientation(img):                                                      
             x = np.mod(x,360)
             clone1 = copy.deepcopy(clone2)
         elif Key == 113:       # q-key as quit button
+            cv2.destroyAllWindows()
             break
 
     if x >= 0 and x <= 180:
@@ -143,16 +144,16 @@ def enemyOrientation(img):                                                      
     x *= np.pi/180             # uncheck if wanted in radians
     return x                   # returns # of radians rotated counterclockwise (in the positive direction)
 
-# IP_adress = '192.168.1.15'
-# cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
-# _, img = cap.read()
+IP_adress = '192.168.1.19'
+cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
+_, img = cap.read()
 # img = cv2.imread("aruco_transformed.png")
 
-# x = enemyOrientation(img)
-# print(x)
-# cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
-# _, img2 = cap.read()
-# img3 = copy.deepcopy(img2)
-# aap, beer = their_position_heading(img2)
-# aap1, beer1 = their_position_heading(img3, x)
-# print(aap, beer, aap1, beer1)
+x = enemyOrientation(img)
+print(x)
+cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
+_, img2 = cap.read()
+img3 = copy.deepcopy(img2)
+aap, beer = their_position_heading(img2)
+aap1, beer1 = their_position_heading(img3, x)
+print(aap, beer, aap1, beer1)

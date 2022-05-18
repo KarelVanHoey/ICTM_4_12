@@ -1,40 +1,23 @@
+from functions_robin import load_instructions_bis
+import random
+import math
+import pygame
 import numpy as np
+import cv2
+import pygame
+import time
+from functions_karel import grab_image_warped
 import cv2
 import time
 from functions_vic import *
 from functions_karel import *
-from functions_robin import *
 from Aruco_Detection import *
 
 
-
-# Start camera thread that enables image requests through grab_image_warped(M, maxWidth, maxHeight)
 global_img = None
-camera_lock = threading.Lock()
 camera_thread = CameraFootage()
 camera_thread.start()
 time.sleep(1)
-
-distance_lock = threading.Lock()
-stack_PC_lock = threading.Lock()
-data_from_robot_lock = threading.Lock()
-
-stack_PC = stack_object()
-global_distance = numerical_object(val=200.0)              # distance between our and enemy aruco in pixels
-global_ultra_sens = numerical_object(val=6.0)
-global_stack_robot_length = numerical_object()
-stop_flag = False
-
-print('t1')
-
-sendport = 28
-receiveport = 29
-pc_send_thread = ServerSendThread("sendthread", sendport, stack_PC, global_distance)
-pc_receive_thread = ServerReceiveThread("receivethread", receiveport, global_stack_robot_length, global_ultra_sens)
-
-pc_send_thread.start()
-pc_receive_thread.start()
-
 print('t2')
 
 # Beginning of time
@@ -43,7 +26,7 @@ print('t2')
 # Definition of colour ranges --> find via Finding_HSV.py
 # edit manually at beginning of game
 
-HSV_blue = np.array([[74, 112, 43], [179, 255, 255]])
+HSV_blue = np.array([[89, 73, 69], [179, 255, 255]])
 HSV_red = np.array([[0, 114, 68], [75, 255, 255]])
 HSV_green = np.array([[23, 61, 63], [92, 255, 255]])
 
@@ -101,36 +84,19 @@ distances = []
 #     # angles, distances = [90, 90, 90, 90], [400, 400, 400, 400]
 #     # print('angles, dist not succesful')
 tries = 0
+t0 = time.process_time()
 while angles == [] and tries != 10:
+    print("tries:", tries)
     try:  
         angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, their_position[0], enemy_size, show_image=1)
     except:
         tries +=1
+print("angles:",angles)
+print("distances:", distances)
 if tries == 10:
     print("Pad maken is mislukt!")
-
-print('aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, their_position[0], enemy_size')
-print(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, their_position[0], enemy_size)
-print('angles, distances')
-print(angles, distances)
-# print(angles, distances)
-# print(len(angles), len(distances))
-
-time.sleep(10)
-# stack_PC_lock.acquire()
-# print("stack_lock acquired")
-
-# ran until here
-temp_stack = create_stack(angles, distances)
-print('temp_stack made')
-print(temp_stack)
-stack_PC.write(temp_stack)
-print("stack written")
-print("stack on PC: ", stack_PC.read())
-# stack_PC_lock.release()
-print("stack_PC_lock released")
-
-
-# distance_thread = DistanceArucoEnemy(global_distance)
-# distance_thread.start()
-
+elapsed_time = time.process_time() - t0
+print(elapsed_time)
+pygame.display.update()
+pygame.event.clear()
+pygame.event.wait(500)
