@@ -183,7 +183,8 @@ def drive(threadName):
 sendport = 29
 port2 = 28
 PC_address = '50:EB:71:67:95:A2'
-#Karel: 'C8:94:02:FB:8B:B4' # Enter the MAC adress from your computer and use ':' instead of '-' given in the command prompt
+#Karel: 'C8:94:02:FB:8B:B4' 
+# Enter the MAC adress from your computer and use ':' instead of '-' given in the command prompt
 
 # Create new threads
 thread1 = ClientSendThread("sendthread", sendport, PC_address)

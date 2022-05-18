@@ -101,12 +101,15 @@ distances = []
 #     # angles, distances = [90, 90, 90, 90], [400, 400, 400, 400]
 #     # print('angles, dist not succesful')
 tries = 0
-while angles == [] and tries != 50:
-    print('tries', tries)
+t0 = time.process_time()
+while angles == [] and tries != 10:
+    print("tries:", tries)
     try:  
         angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, their_position[0], enemy_size, show_image=1)
     except:
         tries +=1
+print("angles:",angles)
+print("distances:", distances)
 if tries == 10:
     print("Pad maken is mislukt!")
 
@@ -117,7 +120,7 @@ print(angles, distances)
 # print(angles, distances)
 # print(len(angles), len(distances))
 
-time.sleep(1)
+time.sleep(10)
 # stack_PC_lock.acquire()
 # print("stack_lock acquired")
 
