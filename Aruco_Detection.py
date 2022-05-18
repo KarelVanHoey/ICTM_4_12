@@ -146,6 +146,7 @@ def enemyOrientation(img):                                                      
 # IP_adress = '192.168.1.15'
 # cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
 # _, img = cap.read()
+# img = cv2.imread("aruco_transformed.png")
 
 # x = enemyOrientation(img)
 # print(x)
