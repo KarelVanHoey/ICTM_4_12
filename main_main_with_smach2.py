@@ -7,9 +7,6 @@ from functions_karel import *
 from Aruco_Detection import *
 from functions_robin import *
 
-#################################################################################################
-#                                         ALL FUNCTIONS                                         #
-################################################################################################# 
 
 # Start camera thread that enables image requests through grab_image_warped(M, maxWidth, maxHeight)
 global_img = None
@@ -67,9 +64,10 @@ friendly_goal, enemy_goal, enemy_goal_centre = goal_allocation(aruco_friend, goa
 
 #defining enemy orientation -> use in their_position_heading(img, enemy_offset), actually only needed in collision avoidance (still needed to be done)
 enemy_offset = enemyOrientation(grab_image())
+enemy_size = 120
 
 #All fixed parameters
-HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M
+# HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size
 
 # Rest of recognition
 while True:
@@ -99,10 +97,6 @@ while True:
 # distance_thread = DistanceArucoEnemy()
 # distance_thread.start()
 
-
-
-
-
 #####################################################################################################
 class State:
     def __init__(self, previous=None):
@@ -116,7 +110,7 @@ class State:
 
 
 class GO_BLOCK(State):
-    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M):
+    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size):
         self.HSV_blue = HSV_blue
         self.HSV_red = HSV_red
         self.HSV_green = HSV_green
@@ -127,6 +121,7 @@ class GO_BLOCK(State):
         self.enemy_goal_centre = enemy_goal_centre
         self.field = field
         self.enemy_offset = enemy_offset
+        self.enemy_size = enemy_size
         self.M = M
         self.Collision = 0
 
@@ -146,7 +141,6 @@ class GO_BLOCK(State):
                 their_position, _ = their_position_heading(grab_image_warped(self.M,self.maxWidth,self.maxHeight))
 
             our_heading[0] *= 180 / np.pi
-            enemy_size = 120
 
             target, green_out, red_out, blue_out = next_target(aruco_friend, self.enemy_goal_centre, their_position[0], green_out, red_out, blue_out)
             #toc = time.process_time_ns()
@@ -154,12 +148,13 @@ class GO_BLOCK(State):
             #path plannning
             angles = []
             distances = []
-            angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, self.M, their_position[0], enemy_size)
+            angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, self.M, their_position[0], self.enemy_size)
             #uses goal -> is goal == [friendly_goal, enemy_goal]? @Robin -> functions_robin.py line 300 neemt aan dat dit centers zijn?
             time.sleep(10)
 
             #create and push stack
             temp_stack = create_stack(angles, distances)
+            temp_stack.pop()                                    #remove last transl from list
             print('temp_stack made')
             print(temp_stack)
             stack_PC.write(temp_stack)
@@ -189,7 +184,21 @@ class GO_BLOCK(State):
         return CLAIM(previous=self)
 
 class CLAIM(State):
-    
+    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size):
+        self.HSV_blue = HSV_blue
+        self.HSV_red = HSV_red
+        self.HSV_green = HSV_green
+        self.maxWidth = maxWidth
+        self.maxHeight = maxHeight 
+        self.friendly_goal = friendly_goal
+        self.enemy_goal = enemy_goal
+        self.enemy_goal_centre = enemy_goal_centre
+        self.field = field
+        self.enemy_offset = enemy_offset
+        self.M = M
+        self.enemy_size = enemy_size
+        self.Collision = 0
+
     def execute(self):
 
         #functions here
@@ -217,7 +226,7 @@ class CLAIM(State):
         return GO_ZONE(previous=self)
             
 class GO_ZONE(State):
-    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M):
+    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size):
         self.HSV_blue = HSV_blue
         self.HSV_red = HSV_red
         self.HSV_green = HSV_green
@@ -229,6 +238,7 @@ class GO_ZONE(State):
         self.field = field
         self.enemy_offset = enemy_offset
         self.M = M
+        self.enemy_size = enemy_size
         self.Collision = 0
     
     def execute(self):
@@ -248,7 +258,6 @@ class GO_ZONE(State):
                 their_position, _ = their_position_heading(grab_image_warped(self.M,self.maxWidth,self.maxHeight))
 
             our_heading[0] *= 180 / np.pi
-            enemy_size = 120
 
             target = self.enemy_goal_centre
             #toc = time.process_time_ns()
@@ -256,7 +265,7 @@ class GO_ZONE(State):
             #path plannning
             angles = []
             distances = []
-            angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, self.M, their_position[0], enemy_size)
+            angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, self.M, their_position[0], self.enemy_size)
             #uses goal -> is goal == [friendly_goal, enemy_goal]? @Robin -> functions_robin.py line 300 neemt aan dat dit centers zijn?
             time.sleep(10)
 
@@ -293,12 +302,35 @@ class GO_ZONE(State):
         return DROP(previous=self)
             
 class DROP(State):
+    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size):
+        self.HSV_blue = HSV_blue
+        self.HSV_red = HSV_red
+        self.HSV_green = HSV_green
+        self.maxWidth = maxWidth
+        self.maxHeight = maxHeight 
+        self.friendly_goal = friendly_goal
+        self.enemy_goal = enemy_goal
+        self.enemy_goal_centre = enemy_goal_centre
+        self.field = field
+        self.enemy_offset = enemy_offset
+        self.M = M
+        self.enemy_size = enemy_size
+        self.Collision = 0
     
     def execute(self):
 
         #functions here
         if global_distance.read() >= 150:
-            aruco_friend, aruco_heading =  our_position_heading(grab_image_warped(self.M, self.maxWidth, self.maxHeight))
+            aruco_friend = []
+
+                                            # Giving of warped image, finding of vertices of goals, inner field and giving of coordinates
+            while aruco_friend == []:       # loop is needed for if no aruco is found due to sudden movements.
+                aruco_friend, our_heading = our_position_heading(grab_image_warped(self.M, self.maxWidth, self.maxHeight))
+
+            distance_to_goal = np.sqrt((self.enemy_goal_centre[0] - aruco_friend[0])^2 + (self.enemy_goal_centre[1] - aruco_friend[1])^2)
+            if distance_to_goal < 200:
+                stack_drop = [['gate', 1], ['transl', -300]]             #[gate, +1] (up), [gate, -1] (down), [transl, x]
+                stack_PC.write(stack_drop)
         else:
             self.Collision = 1
             pass
@@ -319,6 +351,20 @@ class DROP(State):
         return GO_BLOCK(previous=self)
 
 class COLLISION(State):
+    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size):
+        self.HSV_blue = HSV_blue
+        self.HSV_red = HSV_red
+        self.HSV_green = HSV_green
+        self.maxWidth = maxWidth
+        self.maxHeight = maxHeight 
+        self.friendly_goal = friendly_goal
+        self.enemy_goal = enemy_goal
+        self.enemy_goal_centre = enemy_goal_centre
+        self.field = field
+        self.enemy_offset = enemy_offset
+        self.M = M
+        self.enemy_size = enemy_size
+        self.Collision = 0
 
     def execute(self):
 
