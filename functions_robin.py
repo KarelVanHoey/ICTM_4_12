@@ -12,6 +12,14 @@ from functions_karel import grab_image_warped
 # RRT_Drive class: Bevat functies om hoeken en afstanden van gegenereerd pad te halen
 # Load instuctions bis: gebruikt alle bovenstaande om de padplanning uit te voeren en uiteindelijk de hoeken en afstanden v/d stukjes pad terug the geven.
 
+
+def condition_angle(angle):
+    if angle < -180:
+        angle += 360
+    elif angle > 180:
+        angle -= 360
+    return angle
+
 class RRTMap:
     def __init__(self, start, goal, MapDimensions, obsdim, obstacle_coords):
         #start= our location, obsdim = size of squares (bound square)
@@ -22,7 +30,7 @@ class RRTMap:
 
         # window settings
         self.MapWindowName = 'RRT path planning'
-        pygame.display.set_caption(self.MapWindowName)
+        #pygame.display.set_caption(self.MapWindowName)
         self.map = pygame.display.set_mode((self.Mapw, self.Maph))
         self.map.fill((255, 255, 255))
         self.nodeRad = 2
@@ -141,8 +149,8 @@ class RRTGraph:
         obs = self.obstacles.copy()
         while (len(obs) > 0):
             rectang = obs.pop(0)
-            for i in range(0, 101):
-                u = i / 100
+            for i in range(0, 201):
+                u = i / 200
                 x = x1 * u + x2 * (1 - u)
                 y = y1 * u + y2 * (1 - u)
                 if rectang.collidepoint(x, y):
@@ -159,7 +167,7 @@ class RRTGraph:
             self.add_edge(n1, n2)
             return True
 
-    def step(self, nnear, nrand, dmax=70):
+    def step(self, nnear, nrand, dmax=90):
         d = self.distance(nnear, nrand)
         if d > dmax:
             u = dmax / d
@@ -257,29 +265,29 @@ class RRT_Drive:
         self.Y = Y
         self.number_of_nodes = len(X)
 
-    def get_angle(self, img, direction_facing, aruco_friend):
+    def get_angle(self, direction_facing, aruco_friend):
         th = []
-        for i in range(1,self.number_of_nodes-1):
+        for i in range(0,self.number_of_nodes-1):
             if self.X[i+1]-self.X[i] == 0:
                 if self.Y[i+1]-self.Y[i] > 0:
                     th.append(90)
                 else:
                     th.append(-90)
             else:
+                # th.append(condition_angle(round(np.arctan((self.Y[i+1]-self.Y[i]) / (self.X[i+1]-self.X[i]))*180/np.pi,1)))
                 th.append(round(np.arctan2((self.Y[i+1]-self.Y[i]), (self.X[i+1]-self.X[i]))*180/np.pi,1))
     
-        angle_0 = np.arctan2(-self.Y[1] + aruco_friend[1], self.X[1] - aruco_friend[0]) * (180/np.pi) - direction_facing[0]
-        if angle_0 < -180:
-            angle_0 += 360
-        elif angle_0 > 180:
-            angle0 -= 360
+        # angle_0 = -(np.arctan((self.Y[1] - aruco_friend[1]) / (self.X[1] - aruco_friend[0])) * (180/np.pi) - direction_facing[0])
+        angle_0 = np.arctan2((self.Y[1] - aruco_friend[1]), (self.X[1] - aruco_friend[0])) * (180/np.pi) + direction_facing[0]
+        angle_0 = condition_angle(angle_0)
         comm = [angle_0]
-        print("atan:", np.arctan2(self.Y[1] - aruco_friend[1], self.X[1] - aruco_friend[0]))
-        print("direct:", direction_facing[0])
-        print('comm', comm)
-        print('directin facingh', direction_facing[0])
+        # print("atan:", np.arctan((self.Y[1] - aruco_friend[1]) / (self.X[1] - aruco_friend[0])))
+        # print("direct:", direction_facing[0])
+        # print('comm', comm)
+        # print('direction facing', direction_facing[0])
+        th.pop(0)
         for i in range(0,len(th)):
-            comm.append(round(th[i]-th[i-1],1))
+            comm.append(condition_angle(round(th[i]-th[i-1],1)))
         return comm
     
     def get_distance(self):
@@ -308,7 +316,7 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
 
     dimensions =(385, 562)
     start = tuple(aruco_friend)
-    obsdim=70
+    obsdim=50
     obstacle_coords = []
     img = grab_image_warped(M)
     if show_image:
@@ -339,43 +347,49 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
     obstacles=graph.makeobs()
     map.drawMap(obstacles)
 
-    t1=time.time()
-    while (not graph.path_to_goal()):
-        elapsed=time.time()-t1
+    #Kan rectstreeks pad gemaakt worden?
+    if graph.crossObstacle(aruco_friend[0],target[0],aruco_friend[1],target[1]):
+        variable = [aruco_friend[0],aruco_friend[1],target[0],target[1]]
+        pygame.draw.circle(map.map, map.grey, (target[0], target[1]), map.nodeRad*2, 0)
+        pygame.draw.circle(map.map, map.grey, (aruco_friend[0], aruco_friend[1]), map.nodeRad*2, 0)
+        pygame.draw.line(map.map, map.Blue, (target[0], target[1]), (aruco_friend[0], aruco_friend[1]),map.edgeThickness)
+    else: 
+
         t1=time.time()
-        #raise exception if timeout
-        if elapsed > 2:
-            print('Kon geen pad maken')
-            raise
+        while (not graph.path_to_goal()):
+            elapsed=time.time()-t1
+            t1=time.time()
+            #raise exception if timeout
+            if elapsed > 3:
+                print('Kon geen pad maken binnen 3 seconden')
+                raise
 
-        if iteration % 10 == 0:
-            X, Y, Parent = graph.bias(target)
-            pygame.draw.circle(map.map, map.grey, (X[-1], Y[-1]), map.nodeRad*2, 0)
-            pygame.draw.line(map.map, map.Blue, (X[-1], Y[-1]), (X[Parent[-1]], Y[Parent[-1]]),
-                             map.edgeThickness)
+            if iteration % 10 == 0:
+                X, Y, Parent = graph.bias(target)
+                pygame.draw.circle(map.map, map.grey, (X[-1], Y[-1]), map.nodeRad*2, 0)
+                pygame.draw.line(map.map, map.Blue, (X[-1], Y[-1]), (X[Parent[-1]], Y[Parent[-1]]),map.edgeThickness)
 
-        else:
-            X, Y, Parent = graph.expand()
-            pygame.draw.circle(map.map, map.grey, (X[-1], Y[-1]), map.nodeRad*2, 0)
-            pygame.draw.line(map.map, map.Blue, (X[-1], Y[-1]), (X[Parent[-1]], Y[Parent[-1]]),
-                             map.edgeThickness)
+            else:
+                X, Y, Parent = graph.expand()
+                pygame.draw.circle(map.map, map.grey, (X[-1], Y[-1]), map.nodeRad*2, 0)
+                pygame.draw.line(map.map, map.Blue, (X[-1], Y[-1]), (X[Parent[-1]], Y[Parent[-1]]),map.edgeThickness)
 
-        if iteration % 5 == 0:
-            if show_image:
-                pygame.display.update()
-        iteration += 1
-
-    map.drawPath(graph.getPathCoords())
+            if iteration % 5 == 0:
+                if show_image:
+                    pygame.display.update()
+            iteration += 1
+        
+        variable = graph.getPathCoords()
+        map.drawPath(variable)
 
     Xs, Ys = ([], [])
-    l = len(graph.getPathCoords())
-    for e in graph.getPathCoords():
+    for e in variable:
         Xs.append(e[0])
         Ys.append(e[1])
     Xs.reverse()
     Ys.reverse()
     instructions = RRT_Drive(Xs,Ys)
-    angles = instructions.get_angle(img, direction_facing, aruco_friend)
+    angles = instructions.get_angle(direction_facing, aruco_friend)
     distances = instructions.get_distance()
     # print("\n")
     # print("angles: ", angles)
