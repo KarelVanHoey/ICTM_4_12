@@ -143,16 +143,16 @@ def enemyOrientation(img):                                                      
     x *= np.pi/180             # uncheck if wanted in radians
     return x                   # returns # of radians rotated counterclockwise (in the positive direction)
 
-# IP_adress = '192.168.1.15'
-# cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
-# _, img = cap.read()
+IP_adress = '192.168.1.19'
+cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
+_, img = cap.read()
 # img = cv2.imread("aruco_transformed.png")
 
-# x = enemyOrientation(img)
-# print(x)
-# cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
-# _, img2 = cap.read()
-# img3 = copy.deepcopy(img2)
-# aap, beer = their_position_heading(img2)
-# aap1, beer1 = their_position_heading(img3, x)
-# print(aap, beer, aap1, beer1)
+x = enemyOrientation(img)
+print(x)
+cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
+_, img2 = cap.read()
+img3 = copy.deepcopy(img2)
+aap, beer = their_position_heading(img2)
+aap1, beer1 = their_position_heading(img3, x)
+print(aap, beer, aap1, beer1)
