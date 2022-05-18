@@ -108,7 +108,7 @@ print(angles, distances)
 # print(angles, distances)
 # print(len(angles), len(distances))
 
-time.sleep(10)
+time.sleep(1)
 # stack_PC_lock.acquire()
 # print("stack_lock acquired")
 

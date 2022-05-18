@@ -56,7 +56,7 @@ class CameraFootage(threading.Thread):
 
     def __init__(self):
         threading.Thread.__init__(self)
-        self.IP_adress = '192.168.1.15'
+        self.IP_adress = '192.168.1.19'
         self.cap = cv2.VideoCapture('http://'+self.IP_adress+':8000/stream.mjpg')
         # self.cap = cv2.VideoCapture(0)        # Used for testing: webcam
     
