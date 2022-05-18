@@ -20,8 +20,8 @@ stack_PC_lock = threading.Lock()
 data_from_robot_lock = threading.Lock()
 
 stack_PC = stack_object()
-global_distance = numerical_object(val=200.0)              # distance between our and enemy aruco in pixels
-global_ultra_sens = numerical_object(val=6.0)
+global_distance = numerical_object(val=200)              # distance between our and enemy aruco in pixels
+global_ultra_sens = numerical_object()
 global_stack_robot_length = numerical_object()
 stop_flag = False
 
@@ -45,7 +45,7 @@ print('t2')
 
 HSV_blue = np.array([[74, 112, 43], [179, 255, 255]])
 HSV_red = np.array([[0, 114, 68], [75, 255, 255]])
-HSV_green = np.array([[23, 61, 63], [92, 255, 255]])
+HSV_green = np.array([[28, 67, 94], [128, 255, 255]])
 
 # Size of warped image
 maxWidth = 562
@@ -94,20 +94,12 @@ distances = []
 
 # while angles == []:
 # try:
-# angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, their_position[0], enemy_size, show_image=1)
-# print('angles, dist succesful')
+angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, their_position[0], enemy_size, show_image=1)
+print('angles, dist succesful')
 # except:
-    # pass
+#     pass
 #     # angles, distances = [90, 90, 90, 90], [400, 400, 400, 400]
 #     # print('angles, dist not succesful')
-tries = 0
-while angles == [] and tries != 10:
-    try:  
-        angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, their_position[0], enemy_size, show_image=1)
-    except:
-        tries +=1
-if tries == 10:
-    print("Pad maken is mislukt!")
 
 print('aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, their_position[0], enemy_size')
 print(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, their_position[0], enemy_size)

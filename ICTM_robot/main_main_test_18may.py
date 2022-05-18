@@ -43,7 +43,7 @@ print('t2')
 # Definition of colour ranges --> find via Finding_HSV.py
 # edit manually at beginning of game
 
-HSV_blue = np.array([[74, 112, 43], [179, 255, 255]])
+HSV_blue = np.array([[89, 73, 69], [179, 255, 255]])
 HSV_red = np.array([[0, 114, 68], [75, 255, 255]])
 HSV_green = np.array([[23, 61, 63], [92, 255, 255]])
 
@@ -101,7 +101,8 @@ distances = []
 #     # angles, distances = [90, 90, 90, 90], [400, 400, 400, 400]
 #     # print('angles, dist not succesful')
 tries = 0
-while angles == [] and tries != 10:
+while angles == [] and tries != 50:
+    print('tries', tries)
     try:  
         angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, their_position[0], enemy_size, show_image=1)
     except:
@@ -116,7 +117,7 @@ print(angles, distances)
 # print(angles, distances)
 # print(len(angles), len(distances))
 
-time.sleep(10)
+time.sleep(1)
 # stack_PC_lock.acquire()
 # print("stack_lock acquired")
 
@@ -129,7 +130,6 @@ print("stack written")
 print("stack on PC: ", stack_PC.read())
 # stack_PC_lock.release()
 print("stack_PC_lock released")
-
 
 # distance_thread = DistanceArucoEnemy(global_distance)
 # distance_thread.start()
