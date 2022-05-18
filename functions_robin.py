@@ -167,7 +167,7 @@ class RRTGraph:
             self.add_edge(n1, n2)
             return True
 
-    def step(self, nnear, nrand, dmax=90):
+    def step(self, nnear, nrand, dmax=50):
         d = self.distance(nnear, nrand)
         if d > dmax:
             u = dmax / d
@@ -348,8 +348,9 @@ def load_instructions_bis(aruco_friend, direction_facing, target, goal, blue_in,
     map.drawMap(obstacles)
 
     #Kan rectstreeks pad gemaakt worden?
-    if graph.crossObstacle(aruco_friend[0],target[0],aruco_friend[1],target[1]):
-        variable = [aruco_friend[0],aruco_friend[1],target[0],target[1]]
+    if not graph.crossObstacle(aruco_friend[0],target[0],aruco_friend[1],target[1]):
+        variable = [[aruco_friend[0],aruco_friend[1]],[target[0],target[1]]]
+        print("variable: ",variable)
         pygame.draw.circle(map.map, map.grey, (target[0], target[1]), map.nodeRad*2, 0)
         pygame.draw.circle(map.map, map.grey, (aruco_friend[0], aruco_friend[1]), map.nodeRad*2, 0)
         pygame.draw.line(map.map, map.Blue, (target[0], target[1]), (aruco_friend[0], aruco_friend[1]),map.edgeThickness)
