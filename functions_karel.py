@@ -5,7 +5,7 @@ import numpy as np
 from Aruco_Detection import *
 import time
 import keyboard
-import bluetooth
+#import bluetooth
 
 
 # Class that captures most recent image and stores it in a global variable (img)
