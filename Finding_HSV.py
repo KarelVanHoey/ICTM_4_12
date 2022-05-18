@@ -8,7 +8,7 @@ def nothing(x):
     pass
 
 # Initializing the webcam feed.
-IP_adress = '192.168.1.15'
+IP_adress = '192.168.1.19'
 cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
 cap.set(3,1280)
 cap.set(4,720)
