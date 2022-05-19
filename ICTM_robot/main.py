@@ -142,6 +142,8 @@ def client_receive(threadName, port, address):
             mdiff.off()
             Command_Stack.write([])
             break
+        elif message == 'NoneNone':
+            pass
         else:
             # Command_Stack_lock.acquire()
             # print("robot: stack lock acquired")
