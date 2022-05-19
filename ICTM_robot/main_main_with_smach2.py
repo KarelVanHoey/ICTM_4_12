@@ -149,6 +149,7 @@ class GO_BLOCK(State):
 
             target, green_out, red_out, blue_out = next_target(aruco_friend, self.enemy_goal_centre, their_position[0], green_out, red_out, blue_out)
             #toc = time.process_time_ns()
+            print('target found')
 
             #path plannning
             angles = []
@@ -160,7 +161,7 @@ class GO_BLOCK(State):
                 except:
                     tries +=1
             if tries == 10:
-                print("Pad maken is mislukt!")
+                print("failed to make path!")
 
             #create and push stack
             temp_stack = create_stack(angles, distances)
@@ -185,6 +186,8 @@ class GO_BLOCK(State):
         else:
             self.Collision = 1
             pass
+
+        print('end of state GO_block')
 
         #while distance >= 150:
             #Aruco detection
@@ -251,7 +254,7 @@ class CLAIM(State):
                 except:
                     tries +=1
             if tries == 10:
-                print("Pad maken is mislukt!")
+                print("failed to make path!")
             # time.sleep(10)
 
             #create and push stack
@@ -268,6 +271,8 @@ class CLAIM(State):
         else:
             self.Collision = 1
             pass
+
+        print('end of state CLAIM')
 
         #functions here
 
@@ -333,7 +338,7 @@ class GO_ZONE(State):
                 except:
                     tries +=1
             if tries == 10:
-                print("Pad maken is mislukt!")
+                print("failed to make path!")
             # time.sleep(10)
 
             #create and push stack
@@ -349,6 +354,9 @@ class GO_ZONE(State):
         else:
             self.Collision = 1
             pass
+
+        print('end of state GO_ZONE')
+
         #functions here
 
         # global x
@@ -412,6 +420,8 @@ class DROP(State):
         #     return 'outcome4'
         # return 'error4'
 
+        print('end of state DROP')
+
     def __next__(self):
         if self.Collision == 1:
             return COLLISION(HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None)
@@ -437,15 +447,15 @@ class COLLISION(State):
         print('start COLLISION')
         #functions here
         while global_distance.read() < 150:
-            a=3
-        
+            angle = np.pi/4     #define 45 degree angle
+            
         #functions here
 
         # global x
         # while distance < 150:
-        #     # check intersect
-        #     # calculate safe route out
-        #     x=37
+        #     # calculate new frame of reference
+        
+        print('collision avoided!')
 
     def __next__(self):
         if isinstance(self.previous, GO_BLOCK):
