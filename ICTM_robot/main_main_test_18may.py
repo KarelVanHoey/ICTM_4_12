@@ -25,6 +25,9 @@ global_ultra_sens = numerical_object(val=6.0)
 global_stack_robot_length = numerical_object()
 stop_flag = False
 
+print_stack_length = print_robot_stack(global_stack_robot_length)
+print_stack_length.start()
+
 print('t1')
 
 sendport = 28
@@ -133,6 +136,25 @@ print("stack written")
 print("stack on PC: ", stack_PC.read())
 # stack_PC_lock.release()
 print("stack_PC_lock released")
+
+while global_stack_robot_length.read() > 0.5:
+    time.sleep(0.5)
+
+angles = []
+distances = []
+tries = 0
+while angles == [] and tries != 10:
+    try:  
+        angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, their_position[0], enemy_size, show_image=1)
+    except:
+        tries +=1
+
+
+temp_stack = create_stack(angles, distances)
+temp_stack.append(['gate', -1])
+print('temp_stack made')
+print(temp_stack)
+stack_PC.write(temp_stack)
 
 # distance_thread = DistanceArucoEnemy(global_distance)
 # distance_thread.start()

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# test
 from ev3dev2.motor import LargeMotor, OUTPUT_A, OUTPUT_B, OUTPUT_D, SpeedPercent, MediumMotor, MoveDifferential
 from ev3dev2.sensor import INPUT_1, INPUT_4
 from ev3dev2.sensor.lego import GyroSensor, UltrasonicSensor
@@ -121,7 +122,7 @@ def client_send(threadName, port, address):
         message += str(float(Ultra.distance_centimeters))
         message_as_bytes = message.encode()
         sock.send(message_as_bytes)
-        time.sleep(2)
+        time.sleep(0.5)
     sock.close()
 
 
@@ -137,6 +138,10 @@ def client_receive(threadName, port, address):
             # Command_Stack_lock.acquire()
             Command_Stack.write([])
             # Command_Stack_lock.release()
+        elif message == 'e':
+            mdiff.off()
+            Command_Stack.write([])
+            break
         else:
             # Command_Stack_lock.acquire()
             # print("robot: stack lock acquired")
@@ -163,9 +168,9 @@ def drive(threadName):
             loc_stack.pop(0)
             Command_Stack.write(loc_stack)
             if command == 'transl':
-                mdiff.on_for_distance(speed, value, block=False, brake=True)
+                mdiff.on_for_distance(50, value, block=False, brake=True)
             elif command == 'rot':
-                mdiff.turn_degrees(speed, value, block=False, brake=True, use_gyro=True, error_margin=1)
+                mdiff.turn_degrees(30, value, block=False, brake=True, use_gyro=False, error_margin=1)
             elif command == 'gate':
                 FM.on_for_rotations(SpeedPercent(20), -0.45 * value) # up: value == 1; down: value == -1
             mdiff.wait_until_not_moving()
@@ -182,7 +187,8 @@ def drive(threadName):
 
 sendport = 29
 port2 = 28
-PC_address = '50:EB:71:67:95:A2'
+# PC_address = '50:EB:71:67:95:A2'
+PC_address = 'C8:94:02:FB:8B:B4'
 #Karel: 'C8:94:02:FB:8B:B4' 
 # Enter the MAC adress from your computer and use ':' instead of '-' given in the command prompt
 

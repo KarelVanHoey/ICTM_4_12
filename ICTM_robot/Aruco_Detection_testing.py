@@ -2,7 +2,7 @@ import cv2
 import cv2.aruco as aruco
 import numpy as np
 
-IP_adress = '192.168.1.16'
+IP_adress = '192.168.1.13'
 cap = cv2.VideoCapture('http://'+IP_adress+':8000/stream.mjpg')
 # # _, img = cap.read()
 

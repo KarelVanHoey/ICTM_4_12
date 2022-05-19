@@ -25,6 +25,7 @@ global_ultra_sens = numerical_object(val=6.0)
 global_stack_robot_length = numerical_object()
 stop_flag = False
 
+
 sendport = 28
 receiveport = 29
 pc_send_thread = ServerSendThread("sendthread", sendport, stack_PC, global_distance)
@@ -32,6 +33,7 @@ pc_receive_thread = ServerReceiveThread("receivethread", receiveport, global_sta
 
 pc_send_thread.start()
 pc_receive_thread.start()
+time.sleep(10)
 
 # Beginning of time
 t = time.process_time()
@@ -49,11 +51,12 @@ maxHeight = 385
 
 # Initialisation of field (M = transformation matrix)
 M, goal, goal_centre, field = init_playing_field(maxWidth, maxHeight)
+print('Initialisation playing field complete')
 
 # Finding of Aruco markers --> Karel
 aruco_friend = []
 while aruco_friend == []:
-    our_position, our_heading = our_position_heading(grab_image_warped(M, maxWidth, maxHeight))
+    aruco_friend, our_heading = our_position_heading(grab_image_warped(M, maxWidth, maxHeight))
 
     # THE ABOVE WAS:    our_position, our_heading, _, _, _ = our_position_heading(grab_image_warped(M, maxWidth, maxHeight))
     # CHANGED TO :      our_position, our_heading = our_position_heading(grab_image_warped(M, maxWidth, maxHeight))
@@ -61,9 +64,11 @@ while aruco_friend == []:
 
 # Deciding of enemy or friendly goal
 friendly_goal, enemy_goal, enemy_goal_centre = goal_allocation(aruco_friend, goal, goal_centre)
+print('Goal allocated')
 
 #defining enemy orientation -> use in their_position_heading(img, enemy_offset), actually only needed in collision avoidance (still needed to be done)
-enemy_offset = enemyOrientation(grab_image_warped(M, maxWidth, maxHeight))
+enemy_offset = 0
+# enemy_offset = enemyOrientation(grab_image_warped(M, maxWidth, maxHeight))
 enemy_size = 120
 
 #All fixed parameters
@@ -93,8 +98,8 @@ enemy_size = 120
 #     if cv2.waitKey(1) == 27:
 #         break
 
-# distance_thread = DistanceArucoEnemy()
-# distance_thread.start()
+distance_thread = DistanceArucoEnemy(global_distance)
+distance_thread.start()
 
 #####################################################################################################
 class State:
@@ -109,7 +114,7 @@ class State:
 
 
 class GO_BLOCK(State):
-    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size):
+    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None):
         self.HSV_blue = HSV_blue
         self.HSV_red = HSV_red
         self.HSV_green = HSV_green
@@ -125,6 +130,7 @@ class GO_BLOCK(State):
         self.Collision = 0
 
     def execute(self):
+        print('start GO_BLOCK')
         if global_distance.read() >= 150:
             #localization and target selection
             
@@ -155,22 +161,27 @@ class GO_BLOCK(State):
                     tries +=1
             if tries == 10:
                 print("Pad maken is mislukt!")
-            time.sleep(10)
 
             #create and push stack
             temp_stack = create_stack(angles, distances)
             if len(temp_stack) == 2:
-                temp_stack[1][1] -= 100                             #reduce transl
-            else:    
+                temp_stack[1][1] -= 200                             #reduce transl
+            elif len(temp_stack) != 0:    
                 temp_stack.pop()                                    #remove last transl from list
 
             print('temp_stack made')
             print(temp_stack)
             stack_PC.write(temp_stack)
             print("stack written")
-            print("stack on PC: ", stack_PC.read())
+            # print("stack on PC: ", stack_PC.read())
             # stack_PC_lock.release()
-            print("stack_PC_lock released")
+            # print("stack_PC_lock released")
+
+            time.sleep(2)
+
+            while global_stack_robot_length.read() > 0.5:
+                time.sleep(0.5)
+
         else:
             self.Collision = 1
             pass
@@ -188,12 +199,12 @@ class GO_BLOCK(State):
         # return 'error1'
 
     def __next__(self):
-        if isinstance(self.Collision, 1):
-            return COLLISION(previous=self)
-        return CLAIM(previous=self)
+        if self.Collision == 1:
+            return COLLISION(HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None)
+        return CLAIM(HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None)
 
 class CLAIM(State):
-    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size):
+    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None):
         self.HSV_blue = HSV_blue
         self.HSV_red = HSV_red
         self.HSV_green = HSV_green
@@ -209,7 +220,7 @@ class CLAIM(State):
         self.Collision = 0
 
     def execute(self):
-
+        print('start CLAIM')
         #functions here
         if global_distance.read() >= 150:
             #localization and target selection
@@ -241,18 +252,19 @@ class CLAIM(State):
                     tries +=1
             if tries == 10:
                 print("Pad maken is mislukt!")
-            time.sleep(10)
+            # time.sleep(10)
 
             #create and push stack
             temp_stack = create_stack(angles, distances)
-            temp_stack.append(['gate', -1])
+            # temp_stack.append(['gate', -1])
             print('temp_stack made')
             print(temp_stack)
             stack_PC.write(temp_stack)
-            print("stack written")
-            print("stack on PC: ", stack_PC.read())
+            # print("stack written")
+            # print("stack on PC: ", stack_PC.read())
             # stack_PC_lock.release()
-            print("stack_PC_lock released")
+            # print("stack_PC_lock released")
+
         else:
             self.Collision = 1
             pass
@@ -270,12 +282,12 @@ class CLAIM(State):
         # return 'error2'
 
     def __next__(self):
-        if isinstance(self.Collision, 1):
-            return COLLISION(previous=self)
-        return GO_ZONE(previous=self)
+        if self.Collision == 1:
+            return COLLISION(HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None)
+        return GO_ZONE(HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None)
             
 class GO_ZONE(State):
-    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size):
+    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None):
         self.HSV_blue = HSV_blue
         self.HSV_red = HSV_red
         self.HSV_green = HSV_green
@@ -291,7 +303,7 @@ class GO_ZONE(State):
         self.Collision = 0
     
     def execute(self):
-
+        print('start GO_ZONE')
         #functions here
         if global_distance.read() >= 150:
             #detection of objects
@@ -322,7 +334,7 @@ class GO_ZONE(State):
                     tries +=1
             if tries == 10:
                 print("Pad maken is mislukt!")
-            time.sleep(10)
+            # time.sleep(10)
 
             #create and push stack
             temp_stack = create_stack(angles, distances)
@@ -352,12 +364,12 @@ class GO_ZONE(State):
         # return 'error3'
 
     def __next__(self):
-        if isinstance(self.Collision, 1):
-            return COLLISION(previous=self)
-        return DROP(previous=self)
+        if self.Collision == 1:
+            return COLLISION(HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None)
+        return DROP(HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None)
             
 class DROP(State):
-    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size):
+    def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None):
         self.HSV_blue = HSV_blue
         self.HSV_red = HSV_red
         self.HSV_green = HSV_green
@@ -373,7 +385,7 @@ class DROP(State):
         self.Collision = 0
     
     def execute(self):
-
+        print('start DROP')
         #functions here
         if global_distance.read() >= 150:
             aruco_friend = []
@@ -382,7 +394,7 @@ class DROP(State):
             while aruco_friend == []:       # loop is needed for if no aruco is found due to sudden movements.
                 aruco_friend, our_heading = our_position_heading(grab_image_warped(self.M, self.maxWidth, self.maxHeight))
 
-            distance_to_goal = np.sqrt((self.enemy_goal_centre[0] - aruco_friend[0])^2 + (self.enemy_goal_centre[1] - aruco_friend[1])^2)
+            distance_to_goal = np.sqrt((self.enemy_goal_centre[0] - aruco_friend[0])**2 + (self.enemy_goal_centre[1] - aruco_friend[1])**2)
             if distance_to_goal < 200:
                 stack_drop = [['gate', 1], ['transl', -300]]             #[gate, +1] (up), [gate, -1] (down), [transl, x]
                 stack_PC.write(stack_drop)
@@ -401,9 +413,9 @@ class DROP(State):
         # return 'error4'
 
     def __next__(self):
-        if isinstance(self.Collision, 1):
-            return COLLISION(previous=self)
-        return GO_BLOCK(previous=self)
+        if self.Collision == 1:
+            return COLLISION(HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None)
+        return GO_BLOCK(HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None)
 
 class COLLISION(State):
     def __init__(self, HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size):
@@ -422,7 +434,7 @@ class COLLISION(State):
         self.Collision = 0
 
     def execute(self):
-
+        print('start COLLISION')
         #functions here
         while global_distance.read() < 150:
             a=3
@@ -437,16 +449,16 @@ class COLLISION(State):
 
     def __next__(self):
         if isinstance(self.previous, GO_BLOCK):
-            return GO_BLOCK(previous=self)
+            return GO_BLOCK(HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None)
         elif isinstance(self.previous, CLAIM):
-            return CLAIM(previous=self)
+            return CLAIM(HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None)
         elif isinstance(self.previous, GO_ZONE):
-            return GO_ZONE(previous=self)
+            return GO_ZONE(HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None)
         elif isinstance(self.previous, DROP):
-            return DROP(previous=self)
+            return DROP(HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size, previous=None)
 
 class SMACH:
-    def __init__(self, initial_state = GO_BLOCK()):
+    def __init__(self, initial_state = GO_BLOCK(HSV_blue, HSV_red, HSV_green, maxWidth, maxHeight, friendly_goal, enemy_goal, enemy_goal_centre, field, enemy_offset, M, enemy_size)):
         self.state = initial_state
 
     def __iter__(self):
@@ -474,3 +486,10 @@ class SMACH:
 
 for i in SMACH():
     pass
+
+stack_PC.write([['gate', 1]])
+time.sleep(2)
+
+while True:
+    stack_PC.write([['transl', -300], ['rot, 90'], ['transl', -300], ['rot, 90'], ['transl', -300], ['rot, 90'], ['transl', -300], ['rot, 90']])
+    time.sleep(4)

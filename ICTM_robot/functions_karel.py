@@ -42,7 +42,7 @@ class stack_object():
 class numerical_object():
 
     def __init__(self, val=0.0):
-        self.value = [val]
+        self.value = val
 
     def read(self):
         loc_val = copy.deepcopy(self.value)
@@ -56,7 +56,7 @@ class CameraFootage(threading.Thread):
 
     def __init__(self):
         threading.Thread.__init__(self)
-        self.IP_adress = '192.168.1.19'
+        self.IP_adress = '192.168.1.13'
         self.cap = cv2.VideoCapture('http://'+self.IP_adress+':8000/stream.mjpg')
         # self.cap = cv2.VideoCapture(0)        # Used for testing: webcam
     
@@ -130,13 +130,17 @@ class DistanceArucoEnemy(threading.Thread):
         global maxWidth
         global maxHeight
         while True:
-            local_img = grab_image_warped(M, maxWidth, maxHeight)
-            cX, cY, heading, ids, _ , _ = findAruco(local_img)
-            our_position, our_heading, _ , their_position, their_heading = positioning(cX, cY, heading, ids)
-            loc_distance, angle, rel_angle = distanceAruco(our_position, our_heading, their_position)
-            # distance_lock.acquire()
-            self.global_distance.write(copy.deepcopy(loc_distance))
-            # distance_lock.release()
+            time.sleep(0.5)
+            try:
+                local_img = grab_image_warped(M, maxWidth, maxHeight)
+                cX, cY, heading, ids, _ , _ = findAruco(local_img)
+                our_position, our_heading, _ , their_position, their_heading = positioning(cX, cY, heading, ids)
+                loc_distance, angle, rel_angle = distanceAruco(our_position, our_heading, their_position)
+                # distance_lock.acquire()
+                self.global_distance.write(copy.deepcopy(loc_distance)[0])
+                # distance_lock.release()
+            except:
+                pass
 
 
 class ServerSendThread(threading.Thread): # defines class used in the thread that sends data to the robot
@@ -163,23 +167,25 @@ class ServerSendThread(threading.Thread): # defines class used in the thread tha
             print('stack_PC (to be sent)=', self.stack_PC.read())
             # stack_PC_lock.acquire()
             print('global_distance =', self.global_distance.read())
-            if self.global_distance.read()[0] < 150:
+            if keyboard.is_pressed('e'):
+                message = 'e'
+            elif self.global_distance.read() < 150:
                 print('message to robot = stop')
                 message = 'stop'
                 self.stack_PC.write([])
             elif self.stack_PC.read() != []:
-                print('message to robot type = stack')
+                # print('message to robot type = stack')
                 message = 'Command_Stack.write('
                 message += str(self.stack_PC.read()) + ')'
-                print("message to robot =", message)
+                # print("message to robot =", message)
                 self.stack_PC.write([])
             else:
-                print('message to robot = None')
+                # print('message to robot = None')
                 message = 'None'
             # stack_PC_lock.release()
             message_as_bytes = str.encode(message)
             client_sock.send(message_as_bytes)
-            time.sleep(3)
+            time.sleep(1)
         print("stopping thread " + threadName)
 
 
@@ -209,8 +215,8 @@ def server_receive(threadName, port, stack_len, ultra_sens): # prints received m
         message_as_bytes = client_sock.recv(1024)  # wait for answer
         message = message_as_bytes.decode()
         message_parsed = message.split(',')
-        print("message from robot =", message)
-        print("parsed message =", message_parsed)
+        # print("message from robot =", message)
+        # print("parsed message =", message_parsed)
         try:
             message_parsed_float = [float(i) for i in message_parsed]
             data_from_robot_lock.acquire()
@@ -220,3 +226,15 @@ def server_receive(threadName, port, stack_len, ultra_sens): # prints received m
         except:
             break
     print("stopping thread " + threadName)
+
+
+class print_robot_stack(threading.Thread):
+
+    def __init__(self, stack_length):
+        threading.Thread.__init__(self)
+        self.stack_length = stack_length
+
+    def run(self):
+        while True:
+            print(self.stack_length.read())
+            time.sleep(0.5)
