@@ -447,8 +447,37 @@ class COLLISION(State):
         print('start COLLISION')
         #functions here
         while global_distance.read() < 150:
-            angle = np.pi/4     #define 45 degree angle
+            def_angle = np.pi/4     #define 45 degree angle
+
+            #To calculate if robot is in the area we use a frame of reference at the location of our robot
+            while aruco_friend == []:
+                aruco_friend, phi = our_position_heading(grab_image_warped(self.M, self.maxWidth, self.maxHeight))
+                their_position, _ = their_position_heading(grab_image_warped(self.M,self.maxWidth,self.maxHeight))
+            x = aruco_friend[0]
+            y = -aruco_friend[1]
+            k = their_position[0]
+            l = -their_position[1]
+
+            #Transformation translation matrix
+            T1 = np.array([[1,0,-x],[0,1,-y],[0,0,1]])
+            #Transformation rotation matrix
+            T2 = np.array([[np.cos(phi), -np.sin(phi),0],[np.sin(phi), np.cos(phi),0],[0,0,1]])
+
+            #check: P2_our should be zero
+            P1_our = np.array([[x],[y],[1]])
+            P2_our = np.matmul(T2, np.matmul(T1,P1_our))
+
+            P1_their = np.array([[x],[y],[1]])
+            P2_their = np.matmul(T2, np.matmul(T1,P1_their))
+            print(P1_our, P2_our, P1_their,P2_their)
+
+            angle_enemy_rad = np.arctan(P2_their[1]/P2_their[0])
+            angle_enemy_deg = angle_enemy_rad*180/(np.pi/4)
             
+            if abs(angle_enemy_rad) >= def_angle:
+                #drive forward
+                a=3
+                
         #functions here
 
         # global x
