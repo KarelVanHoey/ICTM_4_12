@@ -163,7 +163,7 @@ class GO_BLOCK(State):
                 temp_stack[1][1] -= 100                             #reduce transl
             else:    
                 temp_stack.pop()                                    #remove last transl from list
-                
+
             print('temp_stack made')
             print(temp_stack)
             stack_PC.write(temp_stack)
@@ -317,7 +317,7 @@ class GO_ZONE(State):
             tries = 0
             while angles == [] and tries != 10:
                 try:  
-                    angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, blue_in, blue_out, green_in, green_out, red_in, red_out, M, their_position[0], enemy_size, show_image=1)
+                    angles, distances = load_instructions_bis(aruco_friend, our_heading, target, goal, [], blue_out, [], green_out, [], red_out, M, their_position[0], enemy_size, show_image=1)
                 except:
                     tries +=1
             if tries == 10:
