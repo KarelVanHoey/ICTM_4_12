@@ -33,7 +33,7 @@ LM = LargeMotor(OUTPUT_A)                 # left motor
 RM = LargeMotor(OUTPUT_D)                 # right motor
 FM = MediumMotor(OUTPUT_B)                # Front motor
 Ultra = UltrasonicSensor(INPUT_1)         # Ultrasonic sensor
-Gyro = GyroSensor(INPUT_4)                # Gyro sensor
+# Gyro = GyroSensor(INPUT_4)                # Gyro sensor
 
 # Stack with commands to be executed
 # Commands have the following form: [CommandType, Value]
@@ -69,7 +69,7 @@ mdiff = MoveDifferential(OUTPUT_A, OUTPUT_D, ICTM_Wheel, 195)
 # sound = Sound() # optional: to make the robot talk
 
 mdiff.odometry_start() # needed for gyro
-mdiff.gyro = Gyro
+# mdiff.gyro = Gyro
 speed = 30
 
 class ClientSendThread(threading.Thread):

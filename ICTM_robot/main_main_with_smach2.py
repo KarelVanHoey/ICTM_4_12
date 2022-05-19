@@ -159,7 +159,11 @@ class GO_BLOCK(State):
 
             #create and push stack
             temp_stack = create_stack(angles, distances)
-            temp_stack.pop()                                    #remove last transl from list
+            if len(temp_stack) == 2:
+                temp_stack[1][1] -= 100                             #reduce transl
+            else:    
+                temp_stack.pop()                                    #remove last transl from list
+                
             print('temp_stack made')
             print(temp_stack)
             stack_PC.write(temp_stack)
